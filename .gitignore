@@ -1,0 +1,31 @@
+# === Credenciales y secretos ===
+.env
+.env.local
+*.credentials
+auth-state*.json
+storageState*.json
+
+# === Documentación interna del cliente (NO versionar en repo público) ===
+# Especificaciones funcionales y arquitectura del ERP.
+*.pdf
+
+# === Artefactos de exploración con datos de producción ===
+# Los volcados crudos contienen nombres de clientes/proveedores y montos reales.
+raw/
+results*.json
+*.png
+*.webm
+*.zip
+
+# === Playwright / Node ===
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+npm-debug.log*
+
+# === SO / editor ===
+Thumbs.db
+.DS_Store
+.vscode/

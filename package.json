@@ -1,0 +1,12 @@
+{
+  "name": "qa-porte-erp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Análisis de QA del MVP de PORTE ERP",
+  "scripts": {
+    "explore": "node scripts/explore.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}
