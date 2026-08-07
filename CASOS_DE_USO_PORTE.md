@@ -626,16 +626,42 @@ Valores maestros confirmados en `/config`:
 | **OBS-01** | Media | **Restricción de confidencialidad inconsistente.** `CARGA` tiene bloqueado `/dashboard`, pero accede a `/ventas` (todas las ventas con montos), `/proveedores` (SALDO CC por proveedor) e `/ingresos`/`/egresos`. El "TOTAL A COBRAR" del tablero es derivable de datos que `CARGA` sí ve. Si el objetivo es ocultar información financiera, el bloqueo no lo logra. |
 | **OBS-02** | **Alta** | **`CARGA` puede editar y eliminar proveedores.** En `/proveedores` los botones "Editar" y "Eliminar" están disponibles para el perfil de carga. Para un perfil de data-entry, `Eliminar` sobre un maestro con saldo de cuenta corriente es un permiso de riesgo. |
 | **OBS-03** | Media | **Estado vacío mostrado durante la carga.** En una primera pasada con menor tiempo de espera, `/presupuestos` mostró "0 presupuestos — No hay presupuestos que coincidan con el filtro" e `/ingresos` mostró "Sin ingresos", cuando en realidad **sí había datos**. La app muestra el empty-state en lugar de un indicador de carga, lo que induce a error. |
-| **OBS-04** | Media | **Redirección post-login intermitente.** En una de las tres corridas, `CARGA` aterrizó en `/unauthorized` inmediatamente después del login en vez de en `/carga`. No se reprodujo en las otras dos. Posible condición de carrera entre el redirect por defecto a `/dashboard` y la resolución del rol. **Requiere reproducción dirigida.** |
+| **OBS-04** | ~~Media~~ → **Alta** | **Redirección post-login rota en el perfil de carga.** Reproducción dirigida del 2026-08-06: **4 de 8 logins (50 %)** terminan en `/unauthorized` en vez de `/carga`. `ADMIN` es estable (8/8). Promovido a defecto **DEF-03** — ver [reportes/2026-08-06-presupuestos.md](reportes/2026-08-06-presupuestos.md). |
+| **OBS-07** | Media | **El botón de crear desaparece cuando la lista tiene datos.** En `/presupuestos`, *Nuevo presupuesto* solo se muestra en el estado vacío. Con registros cargados no hay acceso a la creación en esa pantalla (verificado: no hay botones de ícono ocultos). El alta sigue disponible desde `/carga` y por `/presupuestos/nuevo`. |
+| **OBS-08** | Media | **No se pueden eliminar presupuestos.** La vista de detalle solo ofrece *Guardar presupuesto*, sin acción de eliminar ni anular — a diferencia de `/proveedores`, que sí tiene *Editar* y *Eliminar*. Un registro erróneo solo puede neutralizarse pasándolo a "Cancelado". |
+| **OBS-09** | Baja | **El ID contiene espacios.** El identificador real es `PR - 0601` (con espacios alrededor del guion), lo que produce URLs como `/presupuestos/PR%20-%200601`. La documentación especifica `PR-XXXX` sin espacios. Frágil para enlaces e integraciones. |
+| **OBS-10** | Baja | **Las fechas se muestran en UTC, no en hora local.** Confirmado: un registro creado el 2026-08-06 por la tarde se lista con `FECHA 07/08/2026`, porque en UTC ya era el día 7. Todo lo cargado después de las 21:00 hora local queda fechado al día siguiente, lo que afecta los filtros por fecha y los totales de "HOY". |
 | **OBS-05** | Baja | La pantalla de login no expone encabezados ni etiquetas accesibles (`h1`-`h3` vacíos, sin `<label>` detectables). Afecta accesibilidad y la estabilidad de los selectores de automatización. |
 | **OBS-06** | Informativa | **El entorno contiene datos reales de producción**: nombres y apellidos de clientes particulares, razones sociales y datos de contacto de proveedores, y una cartera a cobrar de 8 cifras. Ver §8.4. |
 
-### 8.4 ⚠️ Bloqueante para la Etapa 3
+### 8.4 Entorno de pruebas
 
-`porte-mvp.vercel.app` **contiene datos reales, no datos de prueba**. Toda la exploración fue de solo lectura por esa razón.
+`porte-mvp.vercel.app` **contiene datos reales de producción**. La exploración inicial fue de solo lectura por esa razón.
 
-Los casos de uso de creación, edición y borrado —que son la mayoría de los P0— **no pueden ejecutarse aquí** sin contaminar información productiva. Antes de avanzar hace falta una de estas tres opciones:
+**Resuelto el 2026-08-06:** se recibió autorización explícita para crear, editar y eliminar registros. Procedimiento adoptado:
 
-1. Un entorno de QA separado con datos semilla (preferible).
-2. Autorización explícita para crear registros de prueba identificables en este entorno, con procedimiento de limpieza acordado.
-3. Restringir la ejecución a casos de solo lectura, aceptando que se cubre una fracción menor del catálogo.
+- Todos los registros de prueba llevan el prefijo **`QA-TEST-<corrida>`** en el campo Cliente.
+- **No se modifican ni eliminan registros preexistentes.**
+- Al cerrar cada tanda se limpian los datos generados. Cuando el módulo no permite eliminar (ver OBS-08), se neutralizan pasándolos a estado "Cancelado" y se deja constancia en el reporte para su borrado a nivel de base de datos.
+
+---
+
+## 9. Ejecución
+
+| Fecha | Alcance | Ejecutados | Pasa | Falla | Reporte |
+|---|---|---|---|---|---|
+| 2026-08-06 | Permisos (ambos perfiles) + Presupuestos (alta y validaciones) | 26 | 22 | 4 | [2026-08-06-presupuestos.md](reportes/2026-08-06-presupuestos.md) |
+
+Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). Los 4 fallos corresponden exactamente a los tres defectos abiertos y quedan fijados como regresión.
+
+### Defectos abiertos
+
+| ID | Severidad | Descripción | Caso |
+|---|---|---|---|
+| **DEF-01** | Alta | Se aceptan presupuestos con importe total 0, contra la regla `MONTO_TOTAL > 0` | CU-PR-04 |
+| **DEF-02** | Alta | Se aceptan costos negativos; ningún campo numérico declara `min=0` | CU-PR-05 |
+| **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces y cae en `/unauthorized` | CU-RL-02 |
+
+### Nota de automatización
+
+Los formularios no exponen `id`, `name` ni atributo `type` en sus campos, ni usan `<label for>`. Los selectores deben construirse por **posición absoluta** sobre `<input>`, lo que es frágil ante cambios de layout. **Se recomienda al equipo de desarrollo agregar `data-testid`** antes de consolidar la suite automatizada.

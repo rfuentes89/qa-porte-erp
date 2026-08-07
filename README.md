@@ -13,9 +13,19 @@ Análisis de calidad del MVP de **PORTE ERP**, un sistema de gestión comercial 
 | 0 | Análisis documental y catálogo de casos de uso | ✅ Completa |
 | 1 | Validación de alcance del MVP | 🟡 Parcial — ver divergencias |
 | 2 | Exploración con ambos perfiles y línea base de permisos | ✅ Completa |
-| 3 | Casos de prueba ejecutables | ⛔ **Bloqueada** — ver *Entorno de pruebas* |
+| 3 | Casos de prueba ejecutables | 🟢 En curso — Presupuestos ejecutado |
 | 4 | Automatización con Playwright | ⏸️ Pendiente |
-| 5 | Reporte de ejecución y defectos | ⏸️ Pendiente |
+| 5 | Reporte de ejecución y defectos | 🟢 En curso |
+
+### Defectos abiertos
+
+| ID | Severidad | Descripción |
+|---|---|---|
+| **DEF-01** | Alta | Se aceptan presupuestos con importe total 0 |
+| **DEF-02** | Alta | Se aceptan costos negativos |
+| **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces |
+
+Detalle en [`reportes/`](reportes/).
 
 ---
 
@@ -24,8 +34,20 @@ Análisis de calidad del MVP de **PORTE ERP**, un sistema de gestión comercial 
 | Archivo | Descripción |
 |---|---|
 | [`CASOS_DE_USO_PORTE.md`](CASOS_DE_USO_PORTE.md) | Documento principal: 199 casos de uso (134 P0), reglas de negocio, matriz de permisos por perfil, escenario E2E maestro, divergencias y observaciones |
-| [`scripts/`](scripts/) | Scripts de exploración (solo lectura) usados para relevar la aplicación |
+| [`tests/`](tests/) | Suite automatizada en Playwright + TypeScript (Page Object Model) |
+| [`reportes/`](reportes/) | Reportes de ejecución y defectos |
 | [`.env.example`](.env.example) | Plantilla de variables de entorno |
+
+### Estructura de la suite
+
+```
+tests/
+├── pages/        Page Objects (LoginPage, PresupuestoFormPage, PresupuestosListPage)
+├── support/      Fixtures tipadas, perfiles y matriz de rutas
+├── utils/        Limpieza de datos de prueba
+├── permisos.spec.ts       CU-RL — autenticación y permisos por perfil
+└── presupuestos.spec.ts   CU-PR — alta y validaciones
+```
 
 ---
 
@@ -78,10 +100,29 @@ Para desbloquear la Etapa 3 hace falta una de estas opciones:
 ## Uso
 
 ```bash
-cp .env.example .env    # completar credenciales
+cp .env.example .env          # completar credenciales
 npm install
-node scripts/explore.js
+npx playwright install chromium
+
+npm test                      # suite completa
+npm run test:permisos         # solo permisos por perfil
+npm run test:presupuestos     # solo presupuestos
+npm run test:headed           # con navegador visible
+npm run report                # abrir el reporte HTML
+npm run typecheck             # verificación de tipos
 ```
+
+### Limpieza de datos de prueba
+
+La suite crea registros con el prefijo `QA-TEST` sobre un entorno con datos reales. Al terminar:
+
+```bash
+npx tsx tests/utils/limpiar-datos-qa.ts
+```
+
+Como el módulo de presupuestos no permite eliminar (OBS-08), los registros se neutralizan pasándolos a estado "Cancelado" y quedan listados en el reporte para su borrado en base de datos.
+
+> `retries` está en 0 a propósito: DEF-03 falla el 50 % de las veces y con reintentos pasaría en el segundo intento, quedando oculto.
 
 ---
 
