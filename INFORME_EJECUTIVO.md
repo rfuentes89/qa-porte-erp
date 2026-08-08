@@ -1,8 +1,8 @@
 # PORTE — Informe de hallazgos en lenguaje claro
 
 **Fecha:** 8 de agosto de 2026
+
 **Aplicación revisada:** porte-mvp.vercel.app
-**Para:** Desarrolladores y Product Owner
 
 ---
 
@@ -76,7 +76,7 @@ Al usuario de carga se le ocultan dos pantallas (el Tablero y la Configuración)
 
 ---
 
-## Una nota sobre seguridad (con una buena noticia)
+## Sobre seguridad
 
 Revisamos si el usuario de carga podía "hacerse pasar" por administrador o meterse donde no debe. **La buena noticia:** eso está bien protegido — no pudimos ascender de usuario de carga a administrador, ni ver datos de otros usuarios.
 
@@ -84,15 +84,36 @@ Revisamos si el usuario de carga podía "hacerse pasar" por administrador o mete
 
 ---
 
-## Algo que conviene aclarar con el equipo: la app no coincide con los documentos
+## Lo que está en los documentos pero no en la aplicación
 
-Los documentos de diseño de PORTE describen varias funciones que **hoy no existen en la aplicación**. Las más importantes:
+Los documentos de diseño de PORTE describen un sistema más completo que el que hoy está publicado. Al comparar uno con otro, encontramos varias funciones que **figuran en el diseño pero no existen en la aplicación**.
 
-- **Proyección de flujo de fondos** (prever cuánta plata habrá en 30/60/90 días). Los documentos la marcan como la función *más importante* del sistema, y no está.
-- **Caja y bancos** (ver el saldo de cada cuenta) y **Cuentas de clientes** (deudas y mora por cliente): tampoco están como pantallas.
-- La forma de clasificar los costos y los estados de las obras es **distinta** a la de los documentos.
+### Pantallas completas que faltan
 
-**Por qué importa:** no sabemos si esto es porque la versión de prueba es un recorte intencional o porque quedó pendiente. **Es la primera cosa que conviene aclarar**, porque cambia qué consideramos "error" y qué "todavía no construido". No lo reportamos como fallas hasta confirmarlo.
+- **Proyección de flujo de fondos.** Es la herramienta para anticipar cuánta plata habrá en 30, 60 y 90 días, cruzando lo que se espera cobrar, lo que hay que pagar y los cheques a vencer. Los documentos la señalan como la función **más importante y de máxima prioridad** de todo el sistema. Hoy **no existe**.
+- **Caja y bancos.** La pantalla para ver, en vivo, cuánta plata hay en cada cuenta (banco, billetera virtual, efectivo). Hoy **no existe** como pantalla; los movimientos se cargan, pero no hay una vista consolidada de saldos.
+- **Cuentas de clientes.** El resumen de cuánto debe cada cliente, hace cuántos días que no paga y si está en mora. Hoy **no existe**.
+- **Tablero gerencial.** El panel con los grandes indicadores del negocio para la dirección (tasa de conversión de presupuestos, liquidez, rentabilidad). Existe una pantalla de "Inicio", pero no reúne los indicadores que el diseño describe.
+- **KPI / rentabilidad por obra.** El módulo que compara, obra por obra, lo presupuestado contra lo realmente gastado y le pone una nota (buena/regular/mala). En la aplicación hay pantallas parecidas ("Variaciones", "Aprendizajes"), pero no está claro que calculen esa nota como pide el diseño.
+
+### Registros/maestros que faltan
+
+- **Compras** como registro propio. El diseño separa "la compra" (el compromiso con el proveedor) del "pago" (la salida de plata). En la aplicación eso está unificado dentro de Egresos, y no se ve el estado de cada compra (pendiente, parcial, pagada).
+- **Clientes** como listado propio. El diseño prevé una base de clientes; en la aplicación los clientes aparecen sueltos dentro de las ventas, sin una pantalla para gestionarlos.
+
+### Diferencias de criterio (no faltantes, pero distintos)
+
+- **Cómo se clasifican los costos.** El diseño usa cinco categorías económicas fijas (materiales, mano de obra, indirectos, impuestos, comercial). La aplicación usa otra lista distinta. Esto **afecta cómo se calcularía la rentabilidad** de cada obra.
+- **Los estados de una obra.** En la aplicación son estados de taller (pendiente → planificado → en fabricación → en montaje → entregado → cerrado). En el diseño estaban pensados en función del cobro (pendiente de anticipo → cobro parcial → cobrado). Son dos miradas distintas del mismo proceso.
+
+### Por qué esto importa
+
+Estas diferencias cambian **qué consideramos un error y qué consideramos "todavía no construido"**. Por eso es la **primera cosa que conviene aclarar** con el equipo de desarrollo:
+
+- Si estas funciones son un recorte **intencional** de la versión de prueba, quedan como trabajo futuro planificado y no hay nada que corregir.
+- Si se esperaba que ya estuvieran, entonces hay un desvío importante entre lo diseñado y lo construido.
+
+En particular, llama la atención que la función marcada como **más importante en el diseño (la proyección de flujo de fondos) sea justamente una de las que no está**. Vale la pena confirmar si eso es deliberado.
 
 ---
 
@@ -108,4 +129,4 @@ Los documentos de diseño de PORTE describen varias funciones que **hoy no exist
 | 6 | No se pueden corregir/borrar cargas erróneas | Medio | Evaluar agregar edición/borrado |
 | 5 | El botón de crear presupuesto desaparece | Medio | Mostrarlo siempre |
 | 8 | El bloqueo de pantallas no protege datos | Medio | Definir qué debe ver cada usuario |
-| — | La app no coincide con los documentos de diseño | A definir | **Aclarar alcance primero** |
+| — | Funciones del diseño que no están en la app (flujo de fondos, caja, cuentas de clientes, tablero, compras) | A definir | **Aclarar alcance primero** |
