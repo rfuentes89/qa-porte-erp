@@ -21,9 +21,11 @@ Análisis de calidad del MVP de **PORTE ERP**, un sistema de gestión comercial 
 
 | ID | Severidad | Descripción |
 |---|---|---|
+| **DEF-05** | **Crítica** | Editar un proveedor borra los campos que no se vuelvan a tipear |
 | **DEF-01** | Alta | Se aceptan presupuestos con importe total 0 |
 | **DEF-02** | Alta | Se aceptan costos negativos |
 | **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces |
+| **DEF-04** | Alta | El perfil de carga edita y da de baja proveedores |
 
 Detalle en [`reportes/`](reportes/).
 

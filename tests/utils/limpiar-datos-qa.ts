@@ -13,6 +13,7 @@ import * as dotenv from 'dotenv';
 import { LoginPage } from '../pages/LoginPage';
 import { PresupuestoFormPage } from '../pages/PresupuestoFormPage';
 import { PresupuestosListPage } from '../pages/PresupuestosListPage';
+import { ProveedoresPage } from '../pages/ProveedoresPage';
 import { credenciales } from '../support/perfiles';
 
 dotenv.config();
@@ -56,10 +57,31 @@ async function main(): Promise<void> {
   const finales = await lista.buscarPorMarca(MARCA);
   const vivos = finales.filter((f) => f.estado !== 'Cancelado');
 
-  console.log(`\nEstado final: ${finales.length} registros QA, ${vivos.length} sin cancelar`);
+  console.log(`\nPresupuestos: ${finales.length} registros QA, ${vivos.length} sin cancelar`);
   finales.forEach((f) => console.log(`  ${f.id}  ${f.estado}  ${f.cliente}`));
-  if (finales.length > 0) {
-    console.log('\nPendiente: eliminar estos registros a nivel de base de datos.');
+
+  // --- Proveedores: la baja es lógica, el registro queda inactivo ---
+  const proveedores = new ProveedoresPage(pagina);
+  await proveedores.abrir();
+  const deQA = (await proveedores.nombres()).filter((n) => n.includes(MARCA));
+  console.log(`\nProveedores con la marca "${MARCA}": ${deQA.length}`);
+
+  for (const nombre of deQA) {
+    try {
+      await proveedores.abrir();
+      await proveedores.eliminar(nombre);
+      console.log(`  ${nombre} -> dado de baja`);
+    } catch (error) {
+      console.log(`  ${nombre} -> NO SE PUDO: ${(error as Error).message.slice(0, 80)}`);
+    }
+  }
+
+  await proveedores.abrir();
+  const restantes = (await proveedores.nombres()).filter((n) => n.includes(MARCA));
+  console.log(`\nProveedores QA que siguen activos: ${restantes.length ? restantes.join(', ') : 'ninguno'}`);
+
+  if (finales.length > 0 || deQA.length > 0) {
+    console.log('\nPendiente: eliminar los registros dados de baja a nivel de base de datos.');
   }
 
   await navegador.close();

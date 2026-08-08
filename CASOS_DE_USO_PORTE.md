@@ -624,12 +624,15 @@ Valores maestros confirmados en `/config`:
 | ID | Severidad | Observación |
 |---|---|---|
 | **OBS-01** | Media | **Restricción de confidencialidad inconsistente.** `CARGA` tiene bloqueado `/dashboard`, pero accede a `/ventas` (todas las ventas con montos), `/proveedores` (SALDO CC por proveedor) e `/ingresos`/`/egresos`. El "TOTAL A COBRAR" del tablero es derivable de datos que `CARGA` sí ve. Si el objetivo es ocultar información financiera, el bloqueo no lo logra. |
-| **OBS-02** | **Alta** | **`CARGA` puede editar y eliminar proveedores.** En `/proveedores` los botones "Editar" y "Eliminar" están disponibles para el perfil de carga. Para un perfil de data-entry, `Eliminar` sobre un maestro con saldo de cuenta corriente es un permiso de riesgo. |
+| **OBS-02** | Alta → **cerrada** | **Confirmada el 2026-08-07 y promovida a DEF-04.** El perfil de carga edita y da de baja proveedores; el backend acepta la operación (`PATCH 204`). Atenuante: la baja es lógica, no física. |
 | **OBS-03** | Media | **Estado vacío mostrado durante la carga.** En una primera pasada con menor tiempo de espera, `/presupuestos` mostró "0 presupuestos — No hay presupuestos que coincidan con el filtro" e `/ingresos` mostró "Sin ingresos", cuando en realidad **sí había datos**. La app muestra el empty-state en lugar de un indicador de carga, lo que induce a error. |
 | **OBS-04** | ~~Media~~ → **Alta** | **Redirección post-login rota en el perfil de carga.** Reproducción dirigida del 2026-08-06: **4 de 8 logins (50 %)** terminan en `/unauthorized` en vez de `/carga`. `ADMIN` es estable (8/8). Promovido a defecto **DEF-03** — ver [reportes/2026-08-06-presupuestos.md](reportes/2026-08-06-presupuestos.md). |
 | **OBS-07** | Media | **El botón de crear desaparece cuando la lista tiene datos.** En `/presupuestos`, *Nuevo presupuesto* solo se muestra en el estado vacío. Con registros cargados no hay acceso a la creación en esa pantalla (verificado: no hay botones de ícono ocultos). El alta sigue disponible desde `/carga` y por `/presupuestos/nuevo`. |
 | **OBS-08** | Media | **No se pueden eliminar presupuestos.** La vista de detalle solo ofrece *Guardar presupuesto*, sin acción de eliminar ni anular — a diferencia de `/proveedores`, que sí tiene *Editar* y *Eliminar*. Un registro erróneo solo puede neutralizarse pasándolo a "Cancelado". |
 | **OBS-09** | Baja | **El ID contiene espacios.** El identificador real es `PR - 0601` (con espacios alrededor del guion), lo que produce URLs como `/presupuestos/PR%20-%200601`. La documentación especifica `PR-XXXX` sin espacios. Frágil para enlaces e integraciones. |
+| **OBS-11** | Alta / a evaluar | **El backend es Supabase consultado directo desde el navegador** (`…supabase.co/rest/v1/…`), sin servidor propio. Los permisos dependen enteramente de las políticas de Row Level Security: si son permisivas, el token del perfil de carga puede operar sobre tablas que la interfaz le bloquea. **Sin verificar** — requiere autorización previa. |
+| **OBS-12** | Media | **Los diálogos no exponen roles de accesibilidad.** Ni el modal de edición ni el de confirmación de baja declaran `role="dialog"` o `aria-modal`. Un lector de pantalla no anuncia su apertura ni confina el foco; un usuario no vidente puede confirmar una baja sin saber que se le preguntó. |
+| **OBS-13** | Media | **El botón de alta de proveedores no tiene nombre accesible.** Es un "+" solo-ícono, sin texto, `aria-label` ni `title`. |
 | **OBS-10** | Baja | **Las fechas se muestran en UTC, no en hora local.** Confirmado: un registro creado el 2026-08-06 por la tarde se lista con `FECHA 07/08/2026`, porque en UTC ya era el día 7. Todo lo cargado después de las 21:00 hora local queda fechado al día siguiente, lo que afecta los filtros por fecha y los totales de "HOY". |
 | **OBS-05** | Baja | La pantalla de login no expone encabezados ni etiquetas accesibles (`h1`-`h3` vacíos, sin `<label>` detectables). Afecta accesibilidad y la estabilidad de los selectores de automatización. |
 | **OBS-06** | Informativa | **El entorno contiene datos reales de producción**: nombres y apellidos de clientes particulares, razones sociales y datos de contacto de proveedores, y una cartera a cobrar de 8 cifras. Ver §8.4. |
@@ -651,16 +654,19 @@ Valores maestros confirmados en `/config`:
 | Fecha | Alcance | Ejecutados | Pasa | Falla | Reporte |
 |---|---|---|---|---|---|
 | 2026-08-06 | Permisos (ambos perfiles) + Presupuestos (alta y validaciones) | 26 | 22 | 4 | [2026-08-06-presupuestos.md](reportes/2026-08-06-presupuestos.md) |
+| 2026-08-07 | Proveedores — sesión manual para verificar OBS-02 | 5 | 2 | 3 | [2026-08-07-proveedores-manual.md](reportes/2026-08-07-proveedores-manual.md) |
 
-Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). Los 4 fallos corresponden exactamente a los tres defectos abiertos y quedan fijados como regresión.
+Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). Los fallos corresponden exactamente a los defectos abiertos y quedan fijados como regresión.
 
 ### Defectos abiertos
 
 | ID | Severidad | Descripción | Caso |
 |---|---|---|---|
+| **DEF-05** | **Crítica** | Editar un proveedor borra todos los campos que no se vuelvan a tipear: el modal abre vacío y guarda en blanco lo que no se completó | CU-MA-11, CU-MA-12 |
 | **DEF-01** | Alta | Se aceptan presupuestos con importe total 0, contra la regla `MONTO_TOTAL > 0` | CU-PR-04 |
 | **DEF-02** | Alta | Se aceptan costos negativos; ningún campo numérico declara `min=0` | CU-PR-05 |
 | **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces y cae en `/unauthorized` | CU-RL-02 |
+| **DEF-04** | Alta | El perfil de carga edita y da de baja proveedores; el backend lo permite | DEF-04 |
 
 ### Nota de automatización
 
