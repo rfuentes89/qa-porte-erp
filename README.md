@@ -26,6 +26,9 @@ Análisis de calidad del MVP de **PORTE ERP**, un sistema de gestión comercial 
 | **DEF-02** | Alta | Se aceptan costos negativos |
 | **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces |
 | **DEF-04** | Alta | El perfil de carga edita y da de baja proveedores |
+| **DEF-06** | Alta | Validaciones solo en el frontend: por API se insertan datos inválidos |
+
+**Seguridad (RLS Supabase):** la escalada de privilegios está bloqueada y `profiles` es de fila propia — lo esencial está protegido. Pero las validaciones de negocio son evitables por API directa. Ver [`reportes/2026-08-07-seguridad-rls.md`](reportes/2026-08-07-seguridad-rls.md).
 
 Detalle en [`reportes/`](reportes/).
 

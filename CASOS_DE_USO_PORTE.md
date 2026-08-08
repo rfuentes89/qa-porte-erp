@@ -630,7 +630,8 @@ Valores maestros confirmados en `/config`:
 | **OBS-07** | Media | **El botón de crear desaparece cuando la lista tiene datos.** En `/presupuestos`, *Nuevo presupuesto* solo se muestra en el estado vacío. Con registros cargados no hay acceso a la creación en esa pantalla (verificado: no hay botones de ícono ocultos). El alta sigue disponible desde `/carga` y por `/presupuestos/nuevo`. |
 | **OBS-08** | Media | **No se pueden eliminar presupuestos.** La vista de detalle solo ofrece *Guardar presupuesto*, sin acción de eliminar ni anular — a diferencia de `/proveedores`, que sí tiene *Editar* y *Eliminar*. Un registro erróneo solo puede neutralizarse pasándolo a "Cancelado". |
 | **OBS-09** | Baja | **El ID contiene espacios.** El identificador real es `PR - 0601` (con espacios alrededor del guion), lo que produce URLs como `/presupuestos/PR%20-%200601`. La documentación especifica `PR-XXXX` sin espacios. Frágil para enlaces e integraciones. |
-| **OBS-11** | Alta / a evaluar | **El backend es Supabase consultado directo desde el navegador** (`…supabase.co/rest/v1/…`), sin servidor propio. Los permisos dependen enteramente de las políticas de Row Level Security: si son permisivas, el token del perfil de carga puede operar sobre tablas que la interfaz le bloquea. **Sin verificar** — requiere autorización previa. |
+| **OBS-11** | Alta → **cerrada** | **Verificada el 2026-08-07** (ver [reportes/2026-08-07-seguridad-rls.md](reportes/2026-08-07-seguridad-rls.md)). El backend aplica RLS: la escalada de privilegios está bloqueada y `profiles` es de fila propia. Pero las validaciones de negocio son solo del frontend → **DEF-06**. |
+| **OBS-14** | Media | **Toda la base financiera es legible por el perfil de carga vía API REST directa** (9 tablas). No es fuga nueva —ya las ve en la UI— pero confirma que el bloqueo de `/dashboard` (OBS-01) no protege ningún dato. |
 | **OBS-12** | Media | **Los diálogos no exponen roles de accesibilidad.** Ni el modal de edición ni el de confirmación de baja declaran `role="dialog"` o `aria-modal`. Un lector de pantalla no anuncia su apertura ni confina el foco; un usuario no vidente puede confirmar una baja sin saber que se le preguntó. |
 | **OBS-13** | Media | **El botón de alta de proveedores no tiene nombre accesible.** Es un "+" solo-ícono, sin texto, `aria-label` ni `title`. |
 | **OBS-10** | Baja | **Las fechas se muestran en UTC, no en hora local.** Confirmado: un registro creado el 2026-08-06 por la tarde se lista con `FECHA 07/08/2026`, porque en UTC ya era el día 7. Todo lo cargado después de las 21:00 hora local queda fechado al día siguiente, lo que afecta los filtros por fecha y los totales de "HOY". |
@@ -655,6 +656,7 @@ Valores maestros confirmados en `/config`:
 |---|---|---|---|---|---|
 | 2026-08-06 | Permisos (ambos perfiles) + Presupuestos (alta y validaciones) | 26 | 22 | 4 | [2026-08-06-presupuestos.md](reportes/2026-08-06-presupuestos.md) |
 | 2026-08-07 | Proveedores — sesión manual para verificar OBS-02 | 5 | 2 | 3 | [2026-08-07-proveedores-manual.md](reportes/2026-08-07-proveedores-manual.md) |
+| 2026-08-07 | Seguridad — RLS de Supabase (CU-RL-20/21) | 3 | — | — | [2026-08-07-seguridad-rls.md](reportes/2026-08-07-seguridad-rls.md) |
 
 Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). Los fallos corresponden exactamente a los defectos abiertos y quedan fijados como regresión.
 
@@ -663,6 +665,7 @@ Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). 
 | ID | Severidad | Descripción | Caso |
 |---|---|---|---|
 | **DEF-05** | **Crítica** | Editar un proveedor borra todos los campos que no se vuelvan a tipear: el modal abre vacío y guarda en blanco lo que no se completó | CU-MA-11, CU-MA-12 |
+| **DEF-06** | Alta | Las validaciones de negocio son solo del frontend: por API REST directa se insertan presupuestos sin cliente y con costos negativos (201). Causa raíz común de DEF-01 y DEF-02 | CU-RL-20 |
 | **DEF-01** | Alta | Se aceptan presupuestos con importe total 0, contra la regla `MONTO_TOTAL > 0` | CU-PR-04 |
 | **DEF-02** | Alta | Se aceptan costos negativos; ningún campo numérico declara `min=0` | CU-PR-05 |
 | **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces y cae en `/unauthorized` | CU-RL-02 |
