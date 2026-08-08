@@ -73,28 +73,68 @@ export async function capturarSesionSupabase(
 }
 
 /**
- * Neutraliza los ingresos con monto negativo (baja lógica: `activo=false`,
- * `monto=0`). Los ingresos no tienen borrado físico ni acción de eliminar en
- * la interfaz, así que los tests que ejercitan DEF-07 (ingreso negativo
- * aceptado) usan esto para no dejar registros que corrompan una venta real.
+ * Neutraliza por API los movimientos con monto negativo de una tabla
+ * (`ingresos` o `egresos`): baja lógica con `activo=false` y `monto=0`.
+ *
+ * Ni ingresos ni egresos tienen borrado físico o acción de eliminar en la
+ * interfaz, así que los tests que ejercitan DEF-07/DEF-08 (movimiento negativo
+ * aceptado) usan esto para no dejar registros que corrompan una venta o la caja.
  *
  * Devuelve la cantidad de registros neutralizados.
  */
-export async function anularIngresosNegativos(sesion: SesionSupabase): Promise<number> {
+export async function anularMovimientosNegativos(
+  sesion: SesionSupabase,
+  tabla: 'ingresos' | 'egresos',
+): Promise<number> {
   const cabeceras = {
     apikey: sesion.apikey,
     Authorization: `Bearer ${sesion.token}`,
     'Content-Type': 'application/json',
   };
-  const res = await fetch(`${sesion.supaUrl}/rest/v1/ingresos?monto=lt.0&select=ref`, { headers: cabeceras });
+  const res = await fetch(`${sesion.supaUrl}/rest/v1/${tabla}?monto=lt.0&select=ref`, { headers: cabeceras });
   const negativos = (await res.json()) as Array<{ ref: string }>;
 
   for (const { ref } of negativos) {
-    await fetch(`${sesion.supaUrl}/rest/v1/ingresos?ref=eq.${ref}`, {
+    await fetch(`${sesion.supaUrl}/rest/v1/${tabla}?ref=eq.${ref}`, {
       method: 'PATCH',
       headers: { ...cabeceras, Prefer: 'return=minimal' },
-      body: JSON.stringify({ activo: false, monto: 0, concepto: 'ANULAR - prueba QA' }),
+      body: JSON.stringify({ activo: false, monto: 0 }),
     });
   }
   return negativos.length;
+}
+
+/**
+ * Neutraliza los egresos de prueba que la app acepta pese a ser inválidos
+ * (DEF-08): monto negativo, o monto 0 sin obra ni proveedor (huérfano, contra
+ * RN-04). Un egreso legítimo siempre tiene un proveedor o una obra y un monto
+ * distinto de cero, así que el filtro no toca datos reales.
+ *
+ * Devuelve la cantidad de registros neutralizados.
+ */
+export async function anularEgresosInvalidos(sesion: SesionSupabase): Promise<number> {
+  const cabeceras = {
+    apikey: sesion.apikey,
+    Authorization: `Bearer ${sesion.token}`,
+    'Content-Type': 'application/json',
+  };
+  const consultas = [
+    'egresos?monto=lt.0&activo=eq.true&select=ref',
+    'egresos?monto=eq.0&id_obra=is.null&proveedor_id=is.null&activo=eq.true&select=ref',
+  ];
+
+  const refs = new Set<string>();
+  for (const q of consultas) {
+    const filas = (await (await fetch(`${sesion.supaUrl}/rest/v1/${q}`, { headers: cabeceras })).json()) as Array<{ ref: string }>;
+    filas.forEach((f) => refs.add(f.ref));
+  }
+
+  for (const ref of refs) {
+    await fetch(`${sesion.supaUrl}/rest/v1/egresos?ref=eq.${ref}`, {
+      method: 'PATCH',
+      headers: { ...cabeceras, Prefer: 'return=minimal' },
+      body: JSON.stringify({ activo: false, monto: 0 }),
+    });
+  }
+  return refs.size;
 }

@@ -5,6 +5,7 @@ import { PresupuestosListPage } from '../pages/PresupuestosListPage';
 import { ProveedoresPage } from '../pages/ProveedoresPage';
 import { VentasPage } from '../pages/VentasPage';
 import { IngresoFormPage } from '../pages/IngresoFormPage';
+import { EgresoFormPage } from '../pages/EgresoFormPage';
 import { credenciales, type Rol } from './perfiles';
 
 interface Fixtures {
@@ -14,6 +15,7 @@ interface Fixtures {
   proveedores: ProveedoresPage;
   ventas: VentasPage;
   formIngreso: IngresoFormPage;
+  formEgreso: EgresoFormPage;
   /** Inicia sesión con el rol indicado y devuelve la ruta de aterrizaje. */
   ingresarComo: (rol: Rol) => Promise<string>;
 }
@@ -25,6 +27,7 @@ export const test = base.extend<Fixtures>({
   proveedores: async ({ page }, usar) => usar(new ProveedoresPage(page)),
   ventas: async ({ page }, usar) => usar(new VentasPage(page)),
   formIngreso: async ({ page }, usar) => usar(new IngresoFormPage(page)),
+  formEgreso: async ({ page }, usar) => usar(new EgresoFormPage(page)),
 
   ingresarComo: async ({ page }, usar) => {
     const loginPage = new LoginPage(page);

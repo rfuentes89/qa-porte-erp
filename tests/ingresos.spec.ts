@@ -1,6 +1,6 @@
 import { test, expect } from './support/fixtures';
 import { credenciales } from './support/perfiles';
-import { capturarSesionSupabase, anularIngresosNegativos, type SesionSupabase } from './support/supabase';
+import { capturarSesionSupabase, anularMovimientosNegativos, type SesionSupabase } from './support/supabase';
 
 /**
  * Módulo Ingresos (`/ingresos/nuevo`).
@@ -19,7 +19,7 @@ test.describe('CU-IN — Ingresos', () => {
 
   test.afterAll(async () => {
     // Red de seguridad: neutraliza cualquier ingreso negativo que dejen los tests.
-    const anulados = await anularIngresosNegativos(admin);
+    const anulados = await anularMovimientosNegativos(admin, 'ingresos');
     if (anulados > 0) console.log(`Limpieza: ${anulados} ingreso(s) negativo(s) neutralizado(s).`);
   });
 
