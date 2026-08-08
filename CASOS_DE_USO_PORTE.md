@@ -657,6 +657,7 @@ Valores maestros confirmados en `/config`:
 | 2026-08-06 | Permisos (ambos perfiles) + Presupuestos (alta y validaciones) | 26 | 22 | 4 | [2026-08-06-presupuestos.md](reportes/2026-08-06-presupuestos.md) |
 | 2026-08-07 | Proveedores — sesión manual para verificar OBS-02 | 5 | 2 | 3 | [2026-08-07-proveedores-manual.md](reportes/2026-08-07-proveedores-manual.md) |
 | 2026-08-07 | Seguridad — RLS de Supabase (CU-RL-20/21) | 3 | — | — | [2026-08-07-seguridad-rls.md](reportes/2026-08-07-seguridad-rls.md) |
+| 2026-08-07 | Ventas (solo lectura) + Ingresos (validaciones) | 6 | 5 | 1 | [2026-08-07-ventas-ingresos.md](reportes/2026-08-07-ventas-ingresos.md) |
 
 Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). Los fallos corresponden exactamente a los defectos abiertos y quedan fijados como regresión.
 
@@ -666,6 +667,7 @@ Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). 
 |---|---|---|---|
 | **DEF-05** | **Crítica** | Editar un proveedor borra todos los campos que no se vuelvan a tipear: el modal abre vacío y guarda en blanco lo que no se completó | CU-MA-11, CU-MA-12 |
 | **DEF-06** | Alta | Las validaciones de negocio son solo del frontend: por API REST directa se insertan presupuestos sin cliente y con costos negativos (201). Causa raíz común de DEF-01 y DEF-02 | CU-RL-20 |
+| **DEF-07** | Alta | Se acepta un ingreso con monto negativo (−500) imputado a una venta real: reduce el total cobrado y la caja. Mismo patrón que DEF-02 | CU-IN-06 |
 | **DEF-01** | Alta | Se aceptan presupuestos con importe total 0, contra la regla `MONTO_TOTAL > 0` | CU-PR-04 |
 | **DEF-02** | Alta | Se aceptan costos negativos; ningún campo numérico declara `min=0` | CU-PR-05 |
 | **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces y cae en `/unauthorized` | CU-RL-02 |

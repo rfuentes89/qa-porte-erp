@@ -3,6 +3,8 @@ import { LoginPage } from '../pages/LoginPage';
 import { PresupuestoFormPage } from '../pages/PresupuestoFormPage';
 import { PresupuestosListPage } from '../pages/PresupuestosListPage';
 import { ProveedoresPage } from '../pages/ProveedoresPage';
+import { VentasPage } from '../pages/VentasPage';
+import { IngresoFormPage } from '../pages/IngresoFormPage';
 import { credenciales, type Rol } from './perfiles';
 
 interface Fixtures {
@@ -10,6 +12,8 @@ interface Fixtures {
   formPresupuesto: PresupuestoFormPage;
   listaPresupuestos: PresupuestosListPage;
   proveedores: ProveedoresPage;
+  ventas: VentasPage;
+  formIngreso: IngresoFormPage;
   /** Inicia sesión con el rol indicado y devuelve la ruta de aterrizaje. */
   ingresarComo: (rol: Rol) => Promise<string>;
 }
@@ -19,6 +23,8 @@ export const test = base.extend<Fixtures>({
   formPresupuesto: async ({ page }, usar) => usar(new PresupuestoFormPage(page)),
   listaPresupuestos: async ({ page }, usar) => usar(new PresupuestosListPage(page)),
   proveedores: async ({ page }, usar) => usar(new ProveedoresPage(page)),
+  ventas: async ({ page }, usar) => usar(new VentasPage(page)),
+  formIngreso: async ({ page }, usar) => usar(new IngresoFormPage(page)),
 
   ingresarComo: async ({ page }, usar) => {
     const loginPage = new LoginPage(page);

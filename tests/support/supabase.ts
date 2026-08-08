@@ -71,3 +71,30 @@ export async function capturarSesionSupabase(
   }
   return { supaUrl, apikey, token };
 }
+
+/**
+ * Neutraliza los ingresos con monto negativo (baja lógica: `activo=false`,
+ * `monto=0`). Los ingresos no tienen borrado físico ni acción de eliminar en
+ * la interfaz, así que los tests que ejercitan DEF-07 (ingreso negativo
+ * aceptado) usan esto para no dejar registros que corrompan una venta real.
+ *
+ * Devuelve la cantidad de registros neutralizados.
+ */
+export async function anularIngresosNegativos(sesion: SesionSupabase): Promise<number> {
+  const cabeceras = {
+    apikey: sesion.apikey,
+    Authorization: `Bearer ${sesion.token}`,
+    'Content-Type': 'application/json',
+  };
+  const res = await fetch(`${sesion.supaUrl}/rest/v1/ingresos?monto=lt.0&select=ref`, { headers: cabeceras });
+  const negativos = (await res.json()) as Array<{ ref: string }>;
+
+  for (const { ref } of negativos) {
+    await fetch(`${sesion.supaUrl}/rest/v1/ingresos?ref=eq.${ref}`, {
+      method: 'PATCH',
+      headers: { ...cabeceras, Prefer: 'return=minimal' },
+      body: JSON.stringify({ activo: false, monto: 0, concepto: 'ANULAR - prueba QA' }),
+    });
+  }
+  return negativos.length;
+}
