@@ -634,6 +634,7 @@ Valores maestros confirmados en `/config`:
 | **OBS-14** | Media | **Toda la base financiera es legible por el perfil de carga vía API REST directa** (9 tablas). No es fuga nueva —ya las ve en la UI— pero confirma que el bloqueo de `/dashboard` (OBS-01) no protege ningún dato. |
 | **OBS-12** | Media | **Los diálogos no exponen roles de accesibilidad.** Ni el modal de edición ni el de confirmación de baja declaran `role="dialog"` o `aria-modal`. Un lector de pantalla no anuncia su apertura ni confina el foco; un usuario no vidente puede confirmar una baja sin saber que se le preguntó. |
 | **OBS-13** | Media | **El botón de alta de proveedores no tiene nombre accesible.** Es un "+" solo-ícono, sin texto, `aria-label` ni `title`. |
+| **OBS-15** | Baja / a confirmar | **Gastos fijos aparentemente duplicados.** Cada gasto semilla figura dos veces con los mismos valores. Nuestro alta de prueba quedó una sola vez, lo que apunta a datos semilla cargados dos veces y no a duplicación al guardar. Requiere confirmación del equipo. |
 | **OBS-10** | Baja | **Las fechas se muestran en UTC, no en hora local.** Confirmado: un registro creado el 2026-08-06 por la tarde se lista con `FECHA 07/08/2026`, porque en UTC ya era el día 7. Todo lo cargado después de las 21:00 hora local queda fechado al día siguiente, lo que afecta los filtros por fecha y los totales de "HOY". |
 | **OBS-05** | Baja | La pantalla de login no expone encabezados ni etiquetas accesibles (`h1`-`h3` vacíos, sin `<label>` detectables). Afecta accesibilidad y la estabilidad de los selectores de automatización. |
 | **OBS-06** | Informativa | **El entorno contiene datos reales de producción**: nombres y apellidos de clientes particulares, razones sociales y datos de contacto de proveedores, y una cartera a cobrar de 8 cifras. Ver §8.4. |
@@ -659,6 +660,7 @@ Valores maestros confirmados en `/config`:
 | 2026-08-07 | Seguridad — RLS de Supabase (CU-RL-20/21) | 3 | — | — | [2026-08-07-seguridad-rls.md](reportes/2026-08-07-seguridad-rls.md) |
 | 2026-08-07 | Ventas (solo lectura) + Ingresos (validaciones) | 6 | 5 | 1 | [2026-08-07-ventas-ingresos.md](reportes/2026-08-07-ventas-ingresos.md) |
 | 2026-08-08 | Egresos (validaciones + cheque diferido) | 3 | 1 | 2 | [2026-08-08-egresos.md](reportes/2026-08-08-egresos.md) |
+| 2026-08-08 | Gastos fijos (alta y validaciones) | 2 | 2 | 0 | [2026-08-08-gastos-fijos.md](reportes/2026-08-08-gastos-fijos.md) |
 
 Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). Los fallos corresponden exactamente a los defectos abiertos y quedan fijados como regresión.
 

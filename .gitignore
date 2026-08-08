@@ -30,6 +30,6 @@ Thumbs.db
 .DS_Store
 .vscode/
 
-# Export HTML del documento
-CASOS_DE_USO_PORTE.html
-CASOS_DE_USO_PORTE_files/
+# Exports HTML de los documentos markdown
+*.html
+*_files/

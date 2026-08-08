@@ -138,3 +138,30 @@ export async function anularEgresosInvalidos(sesion: SesionSupabase): Promise<nu
   }
   return refs.size;
 }
+
+/**
+ * Neutraliza por API los gastos fijos de prueba (concepto que empieza con
+ * `QA-TEST`), marcándolos inactivos. Se usa para limpiar aunque un test falle
+ * antes de llegar al borrado por interfaz. Devuelve cuántos neutralizó.
+ */
+export async function anularGastosFijosDePrueba(sesion: SesionSupabase): Promise<number> {
+  const cabeceras = {
+    apikey: sesion.apikey,
+    Authorization: `Bearer ${sesion.token}`,
+    'Content-Type': 'application/json',
+  };
+  const res = await fetch(
+    `${sesion.supaUrl}/rest/v1/gastos_fijos?concepto=like.QA-TEST*&activo=eq.true&select=id`,
+    { headers: cabeceras },
+  );
+  const filas = (await res.json()) as Array<{ id: string }>;
+
+  for (const { id } of filas) {
+    await fetch(`${sesion.supaUrl}/rest/v1/gastos_fijos?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...cabeceras, Prefer: 'return=minimal' },
+      body: JSON.stringify({ activo: false, concepto: 'ANULAR - prueba QA' }),
+    });
+  }
+  return filas.length;
+}

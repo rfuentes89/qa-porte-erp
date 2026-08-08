@@ -46,7 +46,7 @@ En varias pantallas el sistema **guarda importes que no tienen sentido**, sin av
 
 El usuario de "Carga de datos" puede **editar** proveedores y **darlos de baja**, igual que el administrador. Combinado con el problema N° 1 (editar borra datos), significa que ese usuario puede, sin querer, vaciar la ficha de un proveedor o quitarlo de la lista.
 
-**Por qué importa:** conviene decidir a propósito qué puede y qué no puede hacer cada tipo de usuario. Que quien solo carga datos pueda borrar información maestra es un riesgo que probablemente no se quiera correr. (L la baja no borra el proveedor "para siempre" — queda inactivo y es recuperable por quien administre la base de datos.)
+**Por qué importa:** conviene decidir a propósito qué puede y qué no puede hacer cada tipo de usuario. Que quien solo carga datos pueda borrar información maestra es un riesgo que probablemente no se quiera correr. (La baja no borra el proveedor "para siempre" — queda inactivo y es recuperable por quien administre la base de datos.)
 
 ---
 

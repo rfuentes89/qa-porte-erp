@@ -13,9 +13,11 @@ Análisis de calidad del MVP de **PORTE ERP**, un sistema de gestión comercial 
 | 0 | Análisis documental y catálogo de casos de uso | ✅ Completa |
 | 1 | Validación de alcance del MVP | 🟡 Parcial — ver divergencias |
 | 2 | Exploración con ambos perfiles y línea base de permisos | ✅ Completa |
-| 3 | Casos de prueba ejecutables | 🟢 En curso — Presupuestos ejecutado |
-| 4 | Automatización con Playwright | ⏸️ Pendiente |
+| 3 | Casos de prueba ejecutables | ✅ Módulos transaccionales cubiertos |
+| 4 | Automatización con Playwright | 🟢 Suite en TypeScript (POM) |
 | 5 | Reporte de ejecución y defectos | 🟢 En curso |
+
+**Cobertura por módulo:** Presupuestos, Ventas, Ingresos, Egresos, Proveedores y Gastos fijos ejecutados. Gastos fijos es el único sin defectos. Pendiente de aclarar el alcance de los módulos documentados que no existen en el MVP (Flujo de fondos, Caja y bancos, Cuentas de clientes).
 
 ### Defectos abiertos
 
