@@ -4,7 +4,7 @@
 **Tipo:** prueba de seguridad a nivel de datos (CU-RL-20 / CU-RL-21)
 **Entorno:** MVP beta (autorización explícita del responsable para crear/borrar)
 **Alcance:** resolver OBS-11 — ¿los permisos los aplica el backend o solo la interfaz?
-**Reproducción:** `node scripts/rls-probe.mjs`
+**Reproducción:** `npx playwright test tests/seguridad-rls.spec.ts`
 
 ---
 
@@ -71,6 +71,6 @@ Con el token de carga se leen por REST directo las 9 tablas principales: `presup
 ## Nota de método y seguridad de la prueba
 
 - Todas las operaciones destructivas fueron **reversibles**: el intento de escalada se revirtió automáticamente; el presupuesto inyectado se marcó inactivo con el token de admin.
-- La sonda quedó como script parametrizado (`scripts/rls-probe.mjs`) que lee credenciales de `.env` y **no contiene secretos**.
+- La sonda quedó como spec de Playwright en TypeScript (`tests/seguridad-rls.spec.ts`), que lee credenciales de `.env` y **no contiene secretos**.
 - La `apikey` publicable y los tokens no se versionan: aparecen solo en tráfico y `localStorage` en tiempo de ejecución.
 - Autorización: el responsable confirmó por escrito que el entorno es beta sin datos reales y habilitó crear/borrar información.
