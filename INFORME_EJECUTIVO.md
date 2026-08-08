@@ -1,4 +1,4 @@
-# PORTE — Informe de hallazgos en lenguaje claro
+# PORTE — Informe de hallazgos
 
 **Fecha:** 8 de agosto de 2026
 
@@ -8,7 +8,7 @@
 
 ## De qué se trata este informe
 
-Revisamos la aplicación PORTE probándola como lo haría un usuario real: cargando presupuestos, registrando cobros y pagos, entrando con los dos tipos de usuario. Este documento resume **qué cosas encontramos que no funcionan como deberían**, explicadas sin términos técnicos, y **por qué importan para el negocio**.
+Revisamos la aplicación PORTE probándola como lo haría un usuario real: cargando presupuestos, registrando cobros y pagos, entrando con los dos tipos de usuario.
 
 Cada punto es algo verificado y reproducible, con una idea clara de qué riesgo trae. Al final hay un resumen de prioridades.
 
