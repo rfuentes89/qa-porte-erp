@@ -76,6 +76,16 @@ La interfaz del módulo está desplegada: aparece "Clientes" en el menú, la rut
 
 **Bloqueo de verificación:** como no se puede crear un cliente, **no se pudo comprobar si el módulo Clientes hereda los defectos de Proveedores** (DEF-05, el modal de edición que borra datos; DEF-04, el perfil de carga que puede eliminar). El dev dijo que Clientes está "calcado de Proveedores" y con "permisos iguales", así que es muy probable que ambos defectos estén replicados. **Hay que reverificar Clientes una vez aplicada la migración.**
 
+**Confirmación en campo del engaño (mecanismo de la falla silenciosa).** Durante la revisión, una prueba manual independiente creyó haber cargado un cliente y verlo persistido. La reproducción controlada explicó las dos observaciones a la vez:
+
+- Tras guardar, el cliente **aparece en la lista de Clientes en la misma sesión** (la interfaz lo dibuja de forma optimista, antes de confirmar con el servidor). Al **recargar la página (F5), desaparece**: nunca se guardó.
+- Lo que el tester veía en la pantalla de **Registros no era un cliente sino un proveedor** ("IÑANTU S.A · Proveedor"). Registros **no tiene categoría Clientes** (sus filtros son Ingresos, Egresos, Presup., Proveed., Gastos fijos, Variac., Aprend.), así que un cliente nunca aparecería ahí aunque se guardara.
+
+Dos conclusiones de esto:
+
+1. La falla silenciosa **engaña incluso a quien está probando a propósito**: es exactamente el riesgo que corre un usuario real.
+2. **Riesgo de UX (menor):** las pantallas de Clientes y Proveedores son tan parecidas que se confunden. En la prueba, se terminó creando un proveedor creyendo que era un cliente. Conviene diferenciarlas visualmente.
+
 ---
 
 ## Qué hay que hacer
