@@ -661,6 +661,7 @@ Valores maestros confirmados en `/config`:
 | 2026-08-07 | Ventas (solo lectura) + Ingresos (validaciones) | 6 | 5 | 1 | [2026-08-07-ventas-ingresos.md](reportes/2026-08-07-ventas-ingresos.md) |
 | 2026-08-08 | Egresos (validaciones + cheque diferido) | 3 | 1 | 2 | [2026-08-08-egresos.md](reportes/2026-08-08-egresos.md) |
 | 2026-08-08 | Gastos fijos (alta y validaciones) | 2 | 2 | 0 | [2026-08-08-gastos-fijos.md](reportes/2026-08-08-gastos-fijos.md) |
+| 2026-08-10 | Verificación de #9/#5/#7 implementadas por el equipo | — | — | — | [2026-08-10-verificacion-features-dev.md](reportes/2026-08-10-verificacion-features-dev.md) |
 
 Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). Los fallos corresponden exactamente a los defectos abiertos y quedan fijados como regresión.
 
@@ -672,6 +673,8 @@ Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). 
 | **DEF-06** | Alta | Las validaciones de negocio son solo del frontend: por API REST directa se insertan presupuestos sin cliente y con costos negativos (201). Causa raíz común de DEF-01 y DEF-02 | CU-RL-20 |
 | **DEF-07** | Alta | Se acepta un ingreso con monto negativo (−500) imputado a una venta real: reduce el total cobrado y la caja. Mismo patrón que DEF-02 | CU-IN-06 |
 | **DEF-08** | Alta | Egresos sin validación: acepta monto negativo y también un egreso huérfano de monto 0 sin obra ni proveedor (viola RN-04). Descuadra caja y costeo | CU-EG-04, CU-EG-11 |
+| **DEF-09** | Alta | Módulo Clientes desplegado sin su tabla en la base (`clientes` → 404). Crear un cliente falla en silencio: el modal se cierra como si guardara. Bloquea verificar si hereda DEF-04/DEF-05 de Proveedores | CU-MA-04 |
+| **DEF-10** | Media | La nota de rentabilidad se calcula para obras aún en ejecución y da "Buena" solo porque todavía no se gastó todo. El diseño restringe el KPI a obras Entregadas/Cobradas | CU-KP-01 |
 | **DEF-01** | Alta | Se aceptan presupuestos con importe total 0, contra la regla `MONTO_TOTAL > 0` | CU-PR-04 |
 | **DEF-02** | Alta | Se aceptan costos negativos; ningún campo numérico declara `min=0` | CU-PR-05 |
 | **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces y cae en `/unauthorized` | CU-RL-02 |
