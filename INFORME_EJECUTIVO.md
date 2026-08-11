@@ -70,9 +70,15 @@ Todo lo que se carga por la tarde/noche aparece **fechado al día siguiente**. P
 
 ### 8. El bloqueo de pantallas no protege realmente la información
 
-Al usuario de carga se le ocultan dos pantallas (el Tablero y la Configuración), pero la misma información sensible —montos de ventas, deudas, saldos— **sigue estando a la vista** en las otras pantallas que ese usuario sí puede abrir. 
+Al usuario de carga se le ocultan dos pantallas (el Tablero y la Configuración), pero la misma información sensible —montos de ventas, deudas, saldos— **sigue estando a la vista** en las otras pantallas que ese usuario sí puede abrir.
 
 **Por qué importa:** si la intención es que cierta gente no vea ciertos números, hoy no se está logrando. Hay que decidir si eso es un problema o no según quién use cada cuenta.
+
+### 9. Algunos campos aceptan datos con formato inválido
+
+El campo **Teléfono** (en la ficha de proveedores, y también en la de clientes) admite **letras y símbolos**. Por ejemplo, se puede guardar un teléfono como "ABCdef-letras!" y el sistema lo acepta sin objetar.
+
+**Por qué importa:** no rompe cuentas ni caja, pero ensucia los datos maestros: un teléfono mal cargado complica contactar al proveedor y cualquier uso futuro de esos datos. Es la misma raíz que el problema N° 3 (el sistema no valida lo que se carga), aplicada al formato en vez de a los montos.
 
 ---
 
@@ -129,4 +135,5 @@ En particular, llama la atención que la función marcada como **más importante
 | 6 | No se pueden corregir/borrar cargas erróneas | Medio | Evaluar agregar edición/borrado |
 | 5 | El botón de crear presupuesto desaparece | Medio | Mostrarlo siempre |
 | 8 | El bloqueo de pantallas no protege datos | Medio | Definir qué debe ver cada usuario |
+| 9 | Campos que aceptan formato inválido (teléfono con letras) | Bajo | Validar el formato al cargar |
 | — | Funciones del diseño que no están en la app (flujo de fondos, caja, cuentas de clientes, tablero, compras) | A definir | **Aclarar alcance primero** |
