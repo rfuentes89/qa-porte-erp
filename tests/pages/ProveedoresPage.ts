@@ -63,9 +63,18 @@ export class ProveedoresPage {
     return (await this.ficha(nombre)) !== null;
   }
 
-  /** El botón "+" no tiene nombre accesible: se toma el último botón sin texto. */
+  /**
+   * El botón "+" de alta no tiene nombre accesible. Se lo ubica como el último
+   * botón dentro del encabezado (el que contiene el título "Proveedores"), para
+   * no confundirlo con el botón flotante del Asistente —agregado en la
+   * actualización de 2026-08-11— que también es un ícono sin texto.
+   */
   private botonAlta(): Locator {
-    return this.page.locator('button').filter({ hasText: /^$/ }).last();
+    return this.page
+      .getByRole('heading', { level: 1, name: 'Proveedores' })
+      .locator('..')
+      .getByRole('button')
+      .last();
   }
 
   async abrirAlta(): Promise<void> {

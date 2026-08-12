@@ -45,8 +45,17 @@ export class GastosFijosPage {
     return (await this.page.locator('body').innerText()).includes(concepto);
   }
 
+  /**
+   * Botón "+" de alta (sin nombre accesible): último botón del encabezado que
+   * contiene el título "Gastos fijos". Se evita así el botón flotante del
+   * Asistente (agregado el 2026-08-11), que también es un ícono sin texto.
+   */
   private botonAlta(): Locator {
-    return this.page.locator('button').filter({ hasText: /^$/ }).last();
+    return this.page
+      .getByRole('heading', { level: 1, name: 'Gastos fijos' })
+      .locator('..')
+      .getByRole('button')
+      .last();
   }
 
   private botonGuardar(): Locator {

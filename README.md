@@ -19,22 +19,20 @@ Análisis de calidad del MVP de **PORTE ERP**, un sistema de gestión comercial 
 
 **Cobertura por módulo:** Presupuestos, Ventas, Ingresos, Egresos, Proveedores y Gastos fijos ejecutados. Gastos fijos es el único sin defectos. Pendiente de aclarar el alcance de los módulos documentados que no existen en el MVP (Flujo de fondos, Caja y bancos, Cuentas de clientes).
 
-### Defectos abiertos
+### Defectos abiertos (tras la actualización del 2026-08-11)
+
+Re-verificado el 2026-08-12: **8 defectos corregidos**, 2 abiertos. Ver [`reportes/2026-08-12-reverificacion-tras-actualizacion.md`](reportes/2026-08-12-reverificacion-tras-actualizacion.md).
 
 | ID | Severidad | Descripción |
 |---|---|---|
-| **DEF-05** | **Crítica** | Editar un proveedor borra los campos que no se vuelvan a tipear |
-| **DEF-01** | Alta | Se aceptan presupuestos con importe total 0 |
-| **DEF-02** | Alta | Se aceptan costos negativos |
-| **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces |
 | **DEF-04** | Alta | El perfil de carga edita y da de baja proveedores |
-| **DEF-06** | Alta | Validaciones solo en el frontend: por API se insertan datos inválidos |
-| **DEF-07** | Alta | Se acepta un ingreso de monto negativo imputado a una venta real |
-| **DEF-08** | Alta | Egresos sin validación: monto negativo y egreso huérfano de monto 0 |
-| **DEF-09** | Alta | Módulo Clientes desplegado sin su tabla en la base: crear falla en silencio |
 | **DEF-10** | Media | La nota de rentabilidad se muestra para obras aún en ejecución (engañosa) |
 
-**Seguridad (RLS Supabase):** la escalada de privilegios está bloqueada y `profiles` es de fila propia — lo esencial está protegido. Pero las validaciones de negocio son evitables por API directa. Ver [`reportes/2026-08-07-seguridad-rls.md`](reportes/2026-08-07-seguridad-rls.md).
+**Corregidos:** DEF-01, DEF-02, DEF-03, DEF-05 (crítico), DEF-06, DEF-07, DEF-08, DEF-09. La corrección de raíz —validación en el backend (DEF-06)— resolvió toda la familia de montos imposibles.
+
+**Novedad:** la actualización agregó un módulo **Asistente** (IA / carga por lenguaje natural), aún sin cobertura de tests.
+
+**Seguridad (RLS Supabase):** la escalada de privilegios está bloqueada y `profiles` es de fila propia. Ver [`reportes/2026-08-07-seguridad-rls.md`](reportes/2026-08-07-seguridad-rls.md).
 
 Detalle en [`reportes/`](reportes/).
 

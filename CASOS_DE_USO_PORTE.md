@@ -667,20 +667,29 @@ Valores maestros confirmados en `/config`:
 
 Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). Los fallos corresponden exactamente a los defectos abiertos y quedan fijados como regresión.
 
-### Defectos abiertos
+### Estado de defectos
+
+> **Re-verificado el 2026-08-12** tras una actualización de la app. 8 defectos corregidos, 4 abiertos. Detalle en [reportes/2026-08-12-reverificacion-tras-actualizacion.md](reportes/2026-08-12-reverificacion-tras-actualizacion.md).
+
+**Abiertos**
 
 | ID | Severidad | Descripción | Caso |
 |---|---|---|---|
-| **DEF-05** | **Crítica** | Editar un proveedor borra todos los campos que no se vuelvan a tipear: el modal abre vacío y guarda en blanco lo que no se completó | CU-MA-11, CU-MA-12 |
-| **DEF-06** | Alta | Las validaciones de negocio son solo del frontend: por API REST directa se insertan presupuestos sin cliente y con costos negativos (201). Causa raíz común de DEF-01 y DEF-02 | CU-RL-20 |
-| **DEF-07** | Alta | Se acepta un ingreso con monto negativo (−500) imputado a una venta real: reduce el total cobrado y la caja. Mismo patrón que DEF-02 | CU-IN-06 |
-| **DEF-08** | Alta | Egresos sin validación: acepta monto negativo y también un egreso huérfano de monto 0 sin obra ni proveedor (viola RN-04). Descuadra caja y costeo | CU-EG-04, CU-EG-11 |
-| **DEF-09** | Alta | Módulo Clientes desplegado sin su tabla en la base (`clientes` → 404). Crear un cliente falla en silencio: el modal se cierra como si guardara. Bloquea verificar si hereda DEF-04/DEF-05 de Proveedores | CU-MA-04 |
-| **DEF-10** | Media | La nota de rentabilidad se calcula para obras aún en ejecución y da "Buena" solo porque todavía no se gastó todo. El diseño restringe el KPI a obras Entregadas/Cobradas | CU-KP-01 |
-| **DEF-01** | Alta | Se aceptan presupuestos con importe total 0, contra la regla `MONTO_TOTAL > 0` | CU-PR-04 |
-| **DEF-02** | Alta | Se aceptan costos negativos; ningún campo numérico declara `min=0` | CU-PR-05 |
-| **DEF-03** | Alta | El login del perfil de carga falla el 50 % de las veces y cae en `/unauthorized` | CU-RL-02 |
 | **DEF-04** | Alta | El perfil de carga edita y da de baja proveedores; el backend lo permite | DEF-04 |
+| **DEF-10** | Media | La nota de rentabilidad se calcula para obras aún en ejecución y da "Buena" solo porque todavía no se gastó todo. El diseño restringe el KPI a obras Entregadas/Cobradas | CU-KP-01 |
+
+**Corregidos (2026-08-11/12)**
+
+| ID | Severidad | Descripción | Verificación del cierre |
+|---|---|---|---|
+| **DEF-05** | ~~Crítica~~ | Editar un proveedor/cliente borraba los datos (modal vacío) | El modal ahora precarga; CU-MA-11/12 en verde |
+| **DEF-06** | ~~Alta~~ | Validaciones solo en el frontend | El backend rechaza datos inválidos por API (CU-RL-20) |
+| **DEF-01** | ~~Alta~~ | Se aceptaban presupuestos con importe total 0 | CU-PR-04 en verde |
+| **DEF-02** | ~~Alta~~ | Se aceptaban costos negativos | CU-PR-05 en verde |
+| **DEF-07** | ~~Alta~~ | Ingreso con monto negativo | CU-IN-06 en verde |
+| **DEF-08** | ~~Alta~~ | Egreso negativo / huérfano | CU-EG-04/11 en verde |
+| **DEF-09** | ~~Alta~~ | Módulo Clientes sin tabla en la base | La tabla existe; el alta persiste |
+| **DEF-03** | ~~Alta~~ | Login del perfil de carga fallaba el 50 % | 6/6 logins correctos (confirmar con monitoreo) |
 
 ### Nota de automatización
 

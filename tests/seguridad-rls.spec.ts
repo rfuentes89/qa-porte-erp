@@ -83,7 +83,7 @@ test.describe('CU-RL-20/21 — Row Level Security de Supabase', () => {
     expect(rolFinal, 'RLS no debe permitir que el perfil de carga cambie su rol').toBe('data_entry');
   });
 
-  test('CU-RL-20 · las validaciones de negocio son solo del frontend [DEF-06]', { tag: '@destructive' }, async () => {
+  test('CU-RL-20 · el backend valida los datos, no solo el frontend [DEF-06 corregido]', { tag: '@destructive' }, async () => {
     const restCarga = clienteRest(api, carga);
     const restAdmin = clienteRest(api, admin);
     const id = 'PR-RLS-SPEC';
@@ -102,7 +102,7 @@ test.describe('CU-RL-20/21 — Row Level Security de Supabase', () => {
     const res = await restCarga.post('presupuestos', invalido);
     const aceptado = res.status() === 201;
 
-    // Limpieza: no hay DELETE por RLS; se marca inactivo con el token de admin.
+    // Red de seguridad: si el backend aún lo aceptara, se neutraliza con admin.
     if (aceptado) {
       await restAdmin.patch(
         `presupuestos?id=eq.${id}`,
@@ -111,11 +111,12 @@ test.describe('CU-RL-20/21 — Row Level Security de Supabase', () => {
       );
     }
 
-    // DEF-06: el backend acepta datos que la interfaz bloquea. El test documenta
-    // el defecto; volverá a verde cuando se agreguen constraints en la base.
+    // DEF-06 corregido (actualización 2026-08-11): la validación ya no vive
+    // solo en el frontend; el backend rechaza el presupuesto inválido por API.
+    // Guarda de regresión: vuelve a rojo si alguien quita esa validación.
     expect(
       aceptado,
-      'DEF-06 resuelto: el backend ya rechaza presupuestos inválidos. Cerrar el defecto.',
-    ).toBe(true);
+      'el backend debe rechazar un presupuesto sin cliente y con costo negativo (DEF-06)',
+    ).toBe(false);
   });
 });
