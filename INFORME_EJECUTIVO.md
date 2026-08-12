@@ -1,141 +1,96 @@
-# PORTE — Informe de hallazgos
+# PORTE — Informe de estado
 
-**Fecha:** 8 de agosto de 2026
-
-**Aplicación revisada:** porte-mvp.vercel.app
+**Fecha:** 12 de agosto de 2026
+**Aplicación:** porte-mvp.vercel.app
 
 ---
 
 ## De qué se trata este informe
 
-Revisamos la aplicación PORTE probándola como lo haría un usuario real: cargando presupuestos, registrando cobros y pagos, entrando con los dos tipos de usuario.
+Este documento describe **cómo está hoy la aplicación PORTE**: qué hace bien y qué conviene todavía corregir o definir. Está escrito en lenguaje claro, sin tecnicismos, y cada punto fue verificado probando la aplicación como lo haría un usuario real.
 
-Cada punto es algo verificado y reproducible, con una idea clara de qué riesgo trae. Al final hay un resumen de prioridades.
-
-## Lo más urgente
-
-### 1. Editar un proveedor le borra los datos ⚠️ *(lo más grave)*
-
-Cuando uno abre la ficha de un proveedor para **editar** cualquier dato (por ejemplo, corregir un teléfono), el formulario aparece **vacío**, como si el proveedor no tuviera información cargada. Si uno completa solo lo que quería cambiar y guarda, **se borra todo lo demás**: el nombre del contacto, el rubro, el teléfono, todo lo que no se haya vuelto a escribir a mano.
-
-**Por qué importa:** una simple corrección puede hacer perder, sin ningún aviso, toda la información de un proveedor. Y esa información no se puede recuperar desde la aplicación. Es el problema más peligroso que encontramos, porque destruye datos en una acción cotidiana.
+El sistema atravesó una etapa de correcciones importante y hoy se encuentra en un **buen estado operativo**: se puede cotizar, vender, cobrar, pagar y gestionar los maestros, con validaciones que evitan la mayoría de los errores de carga. Lo que queda pendiente son ajustes puntuales y, sobre todo, funciones del diseño original que aún no están construidas.
 
 ---
 
-### 2. Al iniciar sesión, el usuario de carga entra "rebotado" la mitad de las veces
+## Lo que la aplicación hace bien
 
-El usuario de "Carga de datos" (el que se usa en el día a día) **falla al entrar aproximadamente 1 de cada 2 veces**: en lugar de llevarlo a su pantalla, le muestra un cartel de "Acceso denegado". Hay que volver a intentar. El usuario administrador no tiene este problema.
+- **El circuito de trabajo completo funciona.** Se carga un presupuesto, y al aceptarlo se convierte automáticamente en una venta (conservando el mismo número). Sobre esa venta se registran los cobros y los pagos, y cada movimiento actualiza solo los saldos y el estado de cobro de la obra. Se cotiza y se carga una sola vez.
 
-**Por qué importa:** reintentar el ingreso una y otra vez genera desconfianza en la herramienta. Es intermitente pero muy frecuente.
+- **El sistema valida lo que se carga.** No permite guardar importes imposibles: rechaza presupuestos en cero o con costos negativos, cobros y pagos negativos, y pagos sin datos. Esta validación es sólida: no se puede esquivar ni cargando por otras vías. Es el cambio de fondo más importante, porque mantiene limpios todos los números del negocio.
 
----
+- **Se pueden corregir y deshacer las cargas.** Presupuestos, cobros, pagos, proveedores y clientes tienen opción de **editar** y de **dar de baja**, con aviso de confirmación. Un error de carga ya no obliga a convivir con el dato equivocado.
 
-### 3. El sistema acepta montos imposibles
+- **La información se conserva al editar.** Abrir la ficha de un proveedor o cliente para corregir un dato muestra la información ya cargada; cambiar un campo no borra el resto.
 
-En varias pantallas el sistema **guarda importes que no tienen sentido**, sin avisar nada:
+- **El acceso está bien protegido.** Hay dos tipos de usuario (administrador y carga de datos). Un usuario de carga no puede "ascender" a administrador ni ver datos de otros usuarios: la separación de identidades es correcta.
 
-- **Presupuestos:** permite guardar un presupuesto con importe **cero**, o con costos **negativos** (por ejemplo, "materiales: −5.000").
-- **Cobros (ingresos):** permite registrar un cobro de **monto negativo** (por ejemplo, cobrar "−500") sobre una venta real.
-- **Pagos (egresos):** permite registrar un pago **negativo**, e incluso un pago **totalmente vacío** (sin monto, sin proveedor y sin obra asociada).
-
-**Por qué importa:** todos los números del sistema (cuánto se vendió, cuánto se cobró, cuánta plata hay en caja, la rentabilidad de cada obra) se construyen sumando estos registros. Si entran valores imposibles, **todos los reportes quedan mal**. Un cobro negativo, por ejemplo, "descobra" plata que en realidad sí entró. Es el problema de fondo que más ensucia la información del negocio.
+- **Nuevo: un asistente con inteligencia artificial.** Permite cargar presupuestos hablándole en lenguaje natural (por texto, voz o adjuntando la foto/PDF de un comprobante). Entiende el pedido, valida la categoría contra las opciones válidas y pregunta para confirmar. Importante: **respeta las mismas validaciones** que el resto del sistema — probamos pedirle un presupuesto con montos negativos y se negó a cargarlo.
 
 ---
 
-### 4. El usuario de carga puede modificar y dar de baja proveedores
+## Lo que todavía conviene corregir
 
-El usuario de "Carga de datos" puede **editar** proveedores y **darlos de baja**, igual que el administrador. Combinado con el problema N° 1 (editar borra datos), significa que ese usuario puede, sin querer, vaciar la ficha de un proveedor o quitarlo de la lista.
+### 1. El usuario de carga puede dar de baja proveedores y clientes · Prioridad **Alta**
 
-**Por qué importa:** conviene decidir a propósito qué puede y qué no puede hacer cada tipo de usuario. Que quien solo carga datos pueda borrar información maestra es un riesgo que probablemente no se quiera correr. (La baja no borra el proveedor "para siempre" — queda inactivo y es recuperable por quien administre la base de datos.)
+El usuario de "Carga de datos" puede **dar de baja** proveedores (y clientes), igual que el administrador. Conviene decidir a propósito qué puede y qué no puede hacer cada tipo de usuario: que quien solo carga datos pueda eliminar información maestra es un permiso de riesgo que probablemente no se quiera dar.
 
----
+*(Atenuante: la baja no borra el registro para siempre — queda inactivo y es recuperable a nivel de base de datos.)*
 
-## Inconsistencias de menor gravedad
+### 2. La nota de rentabilidad aparece antes de tiempo · Prioridad **Media**
 
-### 5. El botón para crear presupuestos desaparece cuando ya hay presupuestos cargados
+En una obra **todavía en fabricación**, la aplicación ya le pone una nota de rentabilidad ("Buena"). El problema es que esa nota es engañosa: la obra parece muy rentable **solo porque todavía no se gastó lo que falta**. La nota debería mostrarse recién cuando la obra está terminada, para no sacar conclusiones prematuras.
 
-En la pantalla de Presupuestos, el botón "Nuevo presupuesto" **solo aparece cuando la lista está vacía**. Una vez que hay presupuestos cargados, el botón desaparece de esa pantalla. Todavía se puede crear uno desde la pantalla de "Carga", pero es confuso: el acceso desaparece justo cuando el módulo está en uso normal.
+### 3. El bloqueo de pantallas no protege la información · Prioridad **Media / a definir**
 
-### 6. No se podían borrar presupuestos ni movimientos — ✅ CORREGIDO
+Al usuario de carga se le ocultan dos pantallas (el Tablero y la Configuración), pero la misma información sensible —montos de ventas, deudas, saldos— sigue estando a la vista en las otras pantallas que ese usuario sí puede abrir. Si la intención es que cierta gente no vea ciertos números, hoy no se está logrando. Hay que decidir si eso es un problema según quién use cada cuenta.
 
-*(Actualización del 2026-08-11, verificado el 2026-08-12.)*
+### 4. Las fechas se muestran con el día cambiado · Prioridad **Baja**
 
-Antes, los presupuestos, cobros y pagos no tenían opción de eliminar ni corregir una vez cargados. **Ahora sí:** Presupuestos, Ingresos y Egresos muestran botones **"Editar"** y **"Eliminar"** (los proveedores ya los tenían). Se verificó que eliminar un presupuesto funciona: al borrarlo, desaparece del listado. Es una baja lógica (el registro queda inactivo, no se borra físicamente), con un aviso de confirmación.
+Lo que se carga por la tarde/noche aparece **fechado al día siguiente**, porque el sistema usa la hora de referencia de Londres en lugar de la de Argentina. Afecta los totales de "hoy" y los filtros por fecha: un movimiento de la tarde puede contarse en el día equivocado.
 
-**Por qué importaba:** en el uso diario los errores de carga son inevitables; ahora se pueden deshacer desde la aplicación, sin depender de intervención técnica.
+### 5. El campo Teléfono acepta letras · Prioridad **Baja**
 
-### 7. Las fechas se muestran con el día cambiado
+El campo Teléfono (en proveedores y clientes) admite letras y símbolos, sin validar el formato. No rompe cuentas, pero ensucia los datos de contacto.
 
-Todo lo que se carga por la tarde/noche aparece **fechado al día siguiente**. Por ejemplo, algo cargado el 6 a la tarde figura como del día 7. Es un problema de zona horaria (el sistema usa la hora de Londres en lugar de la de Argentina).
+### 6. Un presupuesto aceptado no generó su venta · Prioridad **Baja / a revisar**
 
-**Por qué importa:** afecta los totales de "hoy" (lo ingresado hoy, lo egresado hoy) y los filtros por fecha. Un movimiento de la tarde puede contarse en el día equivocado al cerrar la jornada.
-
-### 8. El bloqueo de pantallas no protege realmente la información
-
-Al usuario de carga se le ocultan dos pantallas (el Tablero y la Configuración), pero la misma información sensible —montos de ventas, deudas, saldos— **sigue estando a la vista** en las otras pantallas que ese usuario sí puede abrir.
-
-**Por qué importa:** si la intención es que cierta gente no vea ciertos números, hoy no se está logrando. Hay que decidir si eso es un problema o no según quién use cada cuenta.
-
-### 9. Algunos campos aceptan datos con formato inválido
-
-El campo **Teléfono** (en la ficha de proveedores, y también en la de clientes) admite **letras y símbolos**. Por ejemplo, se puede guardar un teléfono como "ABCdef-letras!" y el sistema lo acepta sin objetar.
-
-**Por qué importa:** no rompe cuentas ni caja, pero ensucia los datos maestros: un teléfono mal cargado complica contactar al proveedor y cualquier uso futuro de esos datos. Es la misma raíz que el problema N° 3 (el sistema no valida lo que se carga), aplicada al formato en vez de a los montos.
-
----
-
-## Sobre seguridad
-
-Revisamos si el usuario de carga podía "hacerse pasar" por administrador o meterse donde no debe. **La buena noticia:** eso está bien protegido — no pudimos ascender de usuario de carga a administrador, ni ver datos de otros usuarios.
-
-**La contraparte:** las reglas que impiden cargar montos imposibles (problema N° 3) están puestas solo en la "pantalla", no en el "cerebro" del sistema. Por eso se pueden esquivar. La recomendación de fondo es mover esas reglas al núcleo del sistema, para que ningún dato imposible pueda entrar, venga de donde venga.
+La conversión de presupuesto a venta funciona en general, pero se detectó **un caso puntual** (un presupuesto aceptado) que no generó su venta correspondiente, sin una causa evidente. Conviene que el equipo revise por qué ese caso quedó afuera.
 
 ---
 
 ## Lo que está en los documentos pero no en la aplicación
 
-Los documentos de diseño de PORTE describen un sistema más completo que el que hoy está publicado. Al comparar uno con otro, encontramos varias funciones que **figuran en el diseño pero no existen en la aplicación**.
+Los documentos de diseño de PORTE describen un sistema más completo que el publicado. Estas funciones **figuran en el diseño pero todavía no existen** en la aplicación. No las contamos como errores —puede ser un recorte intencional de esta etapa— pero conviene tenerlas a la vista.
 
-### Pantallas completas que faltan
+### Pantallas que faltan
 
-- **Proyección de flujo de fondos.** Es la herramienta para anticipar cuánta plata habrá en 30, 60 y 90 días, cruzando lo que se espera cobrar, lo que hay que pagar y los cheques a vencer. Los documentos la señalan como la función **más importante y de máxima prioridad** de todo el sistema. Hoy **no existe**.
-- **Caja y bancos.** La pantalla para ver, en vivo, cuánta plata hay en cada cuenta (banco, billetera virtual, efectivo). Hoy **no existe** como pantalla; los movimientos se cargan, pero no hay una vista consolidada de saldos.
-- **Cuentas de clientes.** El resumen de cuánto debe cada cliente, hace cuántos días que no paga y si está en mora. Hoy **no existe**.
-- **Tablero gerencial.** El panel con los grandes indicadores del negocio para la dirección (tasa de conversión de presupuestos, liquidez, rentabilidad). Existe una pantalla de "Inicio", pero no reúne los indicadores que el diseño describe.
-- **KPI / rentabilidad por obra.** El módulo que compara, obra por obra, lo presupuestado contra lo realmente gastado y le pone una nota (buena/regular/mala). En la aplicación hay pantallas parecidas ("Variaciones", "Aprendizajes"), pero no está claro que calculen esa nota como pide el diseño.
+- **Proyección de flujo de fondos.** Anticipar cuánta plata habrá en 30, 60 y 90 días, cruzando cobros esperados, pagos, cheques a vencer y gastos fijos. El diseño la marca como la función **más importante y de máxima prioridad** de todo el sistema, y hoy **no existe**.
+- **Caja y bancos.** Ver, en vivo, cuánta plata hay en cada cuenta. Los movimientos se cargan, pero no hay una vista consolidada de saldos.
+- **Cuentas de clientes.** El resumen de cuánto debe cada cliente, hace cuántos días que no paga y si está en mora.
+- **Tablero gerencial.** El panel con los grandes indicadores para la dirección (tasa de conversión, liquidez, rentabilidad). Existe una pantalla de "Inicio", pero no reúne todos esos indicadores.
+- **Compras** como registro propio. El diseño separa la compra (el compromiso con el proveedor) del pago (la salida de plata); hoy está unificado dentro de Egresos, sin ver el estado de cada compra.
 
-### Registros/maestros que faltan
+### Diferencias de criterio
 
-- **Compras** como registro propio. El diseño separa "la compra" (el compromiso con el proveedor) del "pago" (la salida de plata). En la aplicación eso está unificado dentro de Egresos, y no se ve el estado de cada compra (pendiente, parcial, pagada).
-- **Clientes** como listado propio. El diseño prevé una base de clientes; en la aplicación los clientes aparecen sueltos dentro de las ventas, sin una pantalla para gestionarlos.
+- **Clasificación de costos** y **estados de obra**: la aplicación usa listas distintas de las del diseño, lo que cambia cómo se calcularía la rentabilidad y cómo se sigue el avance de una obra.
 
-### Diferencias de criterio (no faltantes, pero distintos)
+### Por qué importa
 
-- **Cómo se clasifican los costos.** El diseño usa cinco categorías económicas fijas (materiales, mano de obra, indirectos, impuestos, comercial). La aplicación usa otra lista distinta. Esto **afecta cómo se calcularía la rentabilidad** de cada obra.
-- **Los estados de una obra.** En la aplicación son estados de taller (pendiente → planificado → en fabricación → en montaje → entregado → cerrado). En el diseño estaban pensados en función del cobro (pendiente de anticipo → cobro parcial → cobrado). Son dos miradas distintas del mismo proceso.
-
-### Por qué esto importa
-
-Estas diferencias cambian **qué consideramos un error y qué consideramos "todavía no construido"**. Por eso es la **primera cosa que conviene aclarar** con el equipo de desarrollo:
-
-- Si estas funciones son un recorte **intencional** de la versión de prueba, quedan como trabajo futuro planificado y no hay nada que corregir.
-- Si se esperaba que ya estuvieran, entonces hay un desvío importante entre lo diseñado y lo construido.
-
-En particular, llama la atención que la función marcada como **más importante en el diseño (la proyección de flujo de fondos) sea justamente una de las que no está**. Vale la pena confirmar si eso es deliberado.
+Conviene **aclarar con el equipo** si estas funciones son un recorte intencional de la versión de prueba (trabajo futuro planificado) o un desvío respecto de lo esperado. Llama la atención que la función marcada como más importante en el diseño —la proyección de flujo de fondos— sea justamente una de las que faltan.
 
 ---
 
-## Resumen y prioridades sugeridas
+## Resumen de prioridades
 
-| # | Hallazgo | Qué tan grave | Recomendación |
+| # | Pendiente | Qué tan grave | Recomendación |
 |---|---|---|---|
-| 1 | Editar un proveedor borra sus datos | **Crítico** | Corregir cuanto antes |
-| 3 | Se aceptan montos imposibles (0, negativos, vacíos) | **Alto** | Corregir en el núcleo del sistema |
-| 2 | El usuario de carga falla al entrar la mitad de las veces | **Alto** | Corregir cuanto antes |
-| 4 | El usuario de carga puede editar/dar de baja proveedores | **Alto** | Decidir permisos por tipo de usuario |
-| 7 | Fechas con el día cambiado | Medio | Ajustar zona horaria |
-| 6 | ~~No se pueden corregir/borrar cargas erróneas~~ | ✅ Corregido | Presupuestos, ingresos y egresos ya tienen Editar/Eliminar |
-| 5 | El botón de crear presupuesto desaparece | Medio | Mostrarlo siempre |
-| 8 | El bloqueo de pantallas no protege datos | Medio | Definir qué debe ver cada usuario |
-| 9 | Campos que aceptan formato inválido (teléfono con letras) | Bajo | Validar el formato al cargar |
-| — | Funciones del diseño que no están en la app (flujo de fondos, caja, cuentas de clientes, tablero, compras) | A definir | **Aclarar alcance primero** |
+| 1 | El usuario de carga puede dar de baja proveedores/clientes | **Alto** | Decidir permisos por tipo de usuario |
+| 2 | La nota de rentabilidad aparece en obras en curso | Medio | Mostrarla solo en obras terminadas |
+| 3 | El bloqueo de pantallas no protege datos | Medio | Definir qué debe ver cada usuario |
+| 4 | Fechas con el día cambiado (zona horaria) | Bajo | Ajustar a la hora de Argentina |
+| 5 | El teléfono acepta letras | Bajo | Validar el formato |
+| 6 | Un presupuesto aceptado sin su venta | Bajo | Revisar el caso puntual |
+| — | Funciones del diseño que faltan (flujo de fondos, caja, cuentas de clientes, tablero, compras) | A definir | **Aclarar alcance con el equipo** |
+
+**En una frase:** hoy PORTE registra y controla bien la operación diaria, con validaciones sólidas y un asistente que suma. Lo que queda es afinar permisos y algunos detalles, y definir cuándo se construye el bloque de proyección y análisis (flujo de fondos, caja, tablero) que el diseño considera el corazón del sistema.
