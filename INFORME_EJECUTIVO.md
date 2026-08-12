@@ -56,11 +56,13 @@ El usuario de "Carga de datos" puede **editar** proveedores y **darlos de baja**
 
 En la pantalla de Presupuestos, el botón "Nuevo presupuesto" **solo aparece cuando la lista está vacía**. Una vez que hay presupuestos cargados, el botón desaparece de esa pantalla. Todavía se puede crear uno desde la pantalla de "Carga", pero es confuso: el acceso desaparece justo cuando el módulo está en uso normal.
 
-### 6. No se pueden borrar presupuestos ni movimientos
+### 6. No se podían borrar presupuestos ni movimientos — ✅ CORREGIDO
 
-Los presupuestos, cobros y pagos **no tienen opción de eliminar ni de corregir** una vez cargados. Si se registra algo por error, no hay forma de deshacerlo desde la aplicación (lo más que se puede es marcar un presupuesto como "Cancelado"). Los proveedores sí se pueden dar de baja.
+*(Actualización del 2026-08-11, verificado el 2026-08-12.)*
 
-**Por qué importa:** en el uso diario los errores de carga son inevitables. No poder corregirlos obliga a convivir con datos equivocados o a pedir intervención técnica.
+Antes, los presupuestos, cobros y pagos no tenían opción de eliminar ni corregir una vez cargados. **Ahora sí:** Presupuestos, Ingresos y Egresos muestran botones **"Editar"** y **"Eliminar"** (los proveedores ya los tenían). Se verificó que eliminar un presupuesto funciona: al borrarlo, desaparece del listado. Es una baja lógica (el registro queda inactivo, no se borra físicamente), con un aviso de confirmación.
+
+**Por qué importaba:** en el uso diario los errores de carga son inevitables; ahora se pueden deshacer desde la aplicación, sin depender de intervención técnica.
 
 ### 7. Las fechas se muestran con el día cambiado
 
@@ -132,7 +134,7 @@ En particular, llama la atención que la función marcada como **más importante
 | 2 | El usuario de carga falla al entrar la mitad de las veces | **Alto** | Corregir cuanto antes |
 | 4 | El usuario de carga puede editar/dar de baja proveedores | **Alto** | Decidir permisos por tipo de usuario |
 | 7 | Fechas con el día cambiado | Medio | Ajustar zona horaria |
-| 6 | No se pueden corregir/borrar cargas erróneas | Medio | Evaluar agregar edición/borrado |
+| 6 | ~~No se pueden corregir/borrar cargas erróneas~~ | ✅ Corregido | Presupuestos, ingresos y egresos ya tienen Editar/Eliminar |
 | 5 | El botón de crear presupuesto desaparece | Medio | Mostrarlo siempre |
 | 8 | El bloqueo de pantallas no protege datos | Medio | Definir qué debe ver cada usuario |
 | 9 | Campos que aceptan formato inválido (teléfono con letras) | Bajo | Validar el formato al cargar |
