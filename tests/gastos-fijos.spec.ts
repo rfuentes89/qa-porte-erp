@@ -32,7 +32,7 @@ test.describe('CU-GF — Gastos fijos', () => {
     await ingresarComo('ADMIN');
   });
 
-  test('CU-GF-01 · alta de un gasto fijo con los datos obligatorios', async ({ gastosFijos }) => {
+  test('CU-GF-01 · alta de un gasto fijo con los datos obligatorios', { tag: '@destructive' }, async ({ gastosFijos }) => {
     const concepto = `${MARCA_QA}-GF-OK`;
     await gastosFijos.abrir();
     const guardo = await gastosFijos.crear({
@@ -47,7 +47,7 @@ test.describe('CU-GF — Gastos fijos', () => {
     expect(await gastosFijos.existe(concepto), 'el gasto debe aparecer en el listado').toBe(true);
   });
 
-  test('CU-GF-01 · el concepto es obligatorio', async ({ gastosFijos }) => {
+  test('CU-GF-01 · el concepto es obligatorio', { tag: '@destructive' }, async ({ gastosFijos }) => {
     await gastosFijos.abrir();
     await gastosFijos.abrirAlta();
     // Con categoría pero sin concepto: no debe guardarse.

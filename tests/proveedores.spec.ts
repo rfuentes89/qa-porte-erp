@@ -1,4 +1,5 @@
 import { test, expect, MARCA_QA } from './support/fixtures';
+import { MENSAJES } from './support/textos';
 
 /**
  * Casos del módulo Proveedores, derivados de la sesión de testing manual
@@ -12,7 +13,7 @@ test.describe('CU-MA — Proveedores', () => {
     await ingresarComo('ADMIN');
   });
 
-  test('CU-MA-08 · alta de proveedor con todos sus datos', async ({ proveedores }) => {
+  test('CU-MA-08 · alta de proveedor con todos sus datos', { tag: '@destructive' }, async ({ proveedores }) => {
     const nombre = `${MARCA_QA}-ALTA`;
     await proveedores.abrir();
     await proveedores.crear({
@@ -31,7 +32,7 @@ test.describe('CU-MA — Proveedores', () => {
     await proveedores.eliminar(nombre);
   });
 
-  test('CU-MA-11 · el modal de edición precarga los datos actuales [DEF-05]', async ({ proveedores }) => {
+  test('CU-MA-11 · el modal de edición precarga los datos actuales [DEF-05]', { tag: '@destructive' }, async ({ proveedores }) => {
     const nombre = `${MARCA_QA}-PRECARGA`;
     await proveedores.abrir();
     await proveedores.crear({ nombre, rubro: 'RUBRO-ORIGINAL', contacto: 'CONTACTO-ORIGINAL' });
@@ -52,7 +53,7 @@ test.describe('CU-MA — Proveedores', () => {
     ).toBe(true);
   });
 
-  test('CU-MA-12 · editar un campo no debe borrar los demás [DEF-05]', async ({ proveedores }) => {
+  test('CU-MA-12 · editar un campo no debe borrar los demás [DEF-05]', { tag: '@destructive' }, async ({ proveedores }) => {
     const nombre = `${MARCA_QA}-WIPE`;
     await proveedores.abrir();
     await proveedores.crear({ nombre, rubro: 'RUBRO-ORIGINAL', contacto: 'CONTACTO-ORIGINAL' });
@@ -73,14 +74,14 @@ test.describe('CU-MA — Proveedores', () => {
     expect(ficha?.texto, 'el contacto se perdió al editar solo el nombre').toContain('CONTACTO-ORIGINAL');
   });
 
-  test('la baja de proveedor es lógica, no física', async ({ proveedores }) => {
+  test('la baja de proveedor es lógica, no física', { tag: '@destructive' }, async ({ proveedores }) => {
     const nombre = `${MARCA_QA}-BAJA`;
     await proveedores.abrir();
     await proveedores.crear({ nombre, rubro: 'RUBRO-QA' });
 
     await proveedores.abrir();
     const aviso = await proveedores.textoConfirmacionBaja(nombre);
-    expect(aviso).toContain('No se borra físicamente');
+    expect(aviso).toContain(MENSAJES.bajaLogicaProveedor);
 
     await proveedores.cancelarDialogo();
     await proveedores.abrir();
@@ -98,7 +99,7 @@ test.describe('CU-MA — Proveedores', () => {
  * son permitidas (PATCH 204 contra el backend).
  */
 test.describe('DEF-04 — Permisos de escritura del perfil de carga', () => {
-  test('el perfil de carga no debería poder dar de baja proveedores', async ({
+  test('el perfil de carga no debería poder dar de baja proveedores', { tag: '@destructive' }, async ({
     browser, proveedores, ingresarComo,
   }) => {
     test.slow();

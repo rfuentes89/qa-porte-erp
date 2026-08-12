@@ -2,19 +2,20 @@ import { test, expect } from './support/fixtures';
 import {
   credenciales, RUTAS, RUTAS_SOLO_ADMIN, RUTAS_COMPARTIDAS, RUTA_SIN_PERMISO,
 } from './support/perfiles';
+import { MENSAJES } from './support/textos';
 
 const ruta = (url: string): string => new URL(url).pathname;
 
 test.describe('CU-RL — Autenticación y permisos', () => {
-  test('CU-RL-01 · el administrador ingresa y aterriza en el tablero', async ({ ingresarComo }) => {
+  test('CU-RL-01 · el administrador ingresa y aterriza en el tablero', { tag: '@smoke' }, async ({ ingresarComo }) => {
     expect(await ingresarComo('ADMIN')).toBe(RUTAS.dashboard);
   });
 
-  test('CU-RL-02 · el perfil de carga ingresa y aterriza en su pantalla de carga', async ({ ingresarComo }) => {
+  test('CU-RL-02 · el perfil de carga ingresa y aterriza en su pantalla de carga', { tag: '@smoke' }, async ({ ingresarComo }) => {
     expect(await ingresarComo('CARGA')).toBe(RUTAS.carga);
   });
 
-  test('CU-RL-03 · se rechazan credenciales inválidas', async ({ page, login }) => {
+  test('CU-RL-03 · se rechazan credenciales inválidas', { tag: '@regression' }, async ({ page, login }) => {
     const cred = credenciales('ADMIN');
     const destino = await login.ingresar({ ...cred, clave: 'clave-incorrecta-qa' });
 
@@ -22,7 +23,7 @@ test.describe('CU-RL — Autenticación y permisos', () => {
     await expect(page.locator('input[type=password]')).toBeVisible();
   });
 
-  test('CU-RL-04 · sin sesión no se accede a una ruta interna', async ({ page }) => {
+  test('CU-RL-04 · sin sesión no se accede a una ruta interna', { tag: '@regression' }, async ({ page }) => {
     await page.goto(RUTAS.ventas, { waitUntil: 'networkidle' });
     await page.waitForTimeout(2_000);
 
@@ -32,18 +33,18 @@ test.describe('CU-RL — Autenticación y permisos', () => {
 
 test.describe('CU-RL-19 — El bloqueo se aplica por URL directa, no solo ocultando el menú', () => {
   for (const rutaAdmin of RUTAS_SOLO_ADMIN) {
-    test(`el perfil de carga no accede a ${rutaAdmin}`, async ({ page, ingresarComo }) => {
+    test(`el perfil de carga no accede a ${rutaAdmin}`, { tag: '@regression' }, async ({ page, ingresarComo }) => {
       await ingresarComo('CARGA');
       await page.goto(rutaAdmin, { waitUntil: 'networkidle' });
       await page.waitForTimeout(2_500);
 
       expect(ruta(page.url())).toBe(RUTA_SIN_PERMISO);
-      await expect(page.getByText('No tenés permisos para ver esta página')).toBeVisible();
+      await expect(page.getByText(MENSAJES.accesoDenegado)).toBeVisible();
     });
   }
 
   for (const rutaAdmin of RUTAS_SOLO_ADMIN) {
-    test(`el administrador sí accede a ${rutaAdmin}`, async ({ page, ingresarComo }) => {
+    test(`el administrador sí accede a ${rutaAdmin}`, { tag: '@regression' }, async ({ page, ingresarComo }) => {
       await ingresarComo('ADMIN');
       await page.goto(rutaAdmin, { waitUntil: 'networkidle' });
       await page.waitForTimeout(2_500);
@@ -55,7 +56,7 @@ test.describe('CU-RL-19 — El bloqueo se aplica por URL directa, no solo oculta
 
 test.describe('Rutas compartidas — deben responder igual para ambos perfiles', () => {
   for (const rutaComun of RUTAS_COMPARTIDAS) {
-    test(`el perfil de carga accede a ${rutaComun}`, async ({ page, ingresarComo }) => {
+    test(`el perfil de carga accede a ${rutaComun}`, { tag: '@regression' }, async ({ page, ingresarComo }) => {
       await ingresarComo('CARGA');
       await page.goto(rutaComun, { waitUntil: 'networkidle' });
       await page.waitForTimeout(2_500);
@@ -75,7 +76,7 @@ test.describe('Rutas compartidas — deben responder igual para ambos perfiles',
 test.describe('DEF-03 — Estabilidad del login', () => {
   const INTENTOS = 6;
 
-  test(`el perfil de carga aterriza en su home en ${INTENTOS} logins consecutivos`, async ({ browser }) => {
+  test(`el perfil de carga aterriza en su home en ${INTENTOS} logins consecutivos`, { tag: '@regression' }, async ({ browser }) => {
     test.slow();
     const cred = credenciales('CARGA');
     const aterrizajes: string[] = [];

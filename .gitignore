@@ -33,3 +33,6 @@ Thumbs.db
 # Exports HTML de los documentos markdown
 *.html
 *_files/
+
+# Scaffold de referencia (repo aparte, no versionar aquí)
+Playwright-Scaffold-AI-Assisted-Development-Public/

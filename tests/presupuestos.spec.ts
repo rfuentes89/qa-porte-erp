@@ -12,14 +12,14 @@ test.describe('CU-PR — Presupuestos', () => {
     await ingresarComo('ADMIN');
   });
 
-  test('CU-PR-03 · rechaza un presupuesto sin cliente', async ({ formPresupuesto }) => {
+  test('CU-PR-03 · rechaza un presupuesto sin cliente', { tag: '@destructive' }, async ({ formPresupuesto }) => {
     await formPresupuesto.abrirNuevo();
     const resultado = await formPresupuesto.guardar();
 
     expect(resultado.guardo, 'no debe guardarse un presupuesto sin cliente').toBe(false);
   });
 
-  test('CU-PR-04 · rechaza un presupuesto con importe total 0 [DEF-01]', async ({ formPresupuesto }) => {
+  test('CU-PR-04 · rechaza un presupuesto con importe total 0 [DEF-01]', { tag: '@destructive' }, async ({ formPresupuesto }) => {
     await formPresupuesto.abrirNuevo();
     await formPresupuesto.completar({
       cliente: `${MARCA_QA}-MONTO0`,
@@ -31,7 +31,7 @@ test.describe('CU-PR — Presupuestos', () => {
     expect(resultado.guardo, 'no debe guardarse un presupuesto de importe 0').toBe(false);
   });
 
-  test('CU-PR-05 · rechaza costos negativos [DEF-02]', async ({ formPresupuesto }) => {
+  test('CU-PR-05 · rechaza costos negativos [DEF-02]', { tag: '@destructive' }, async ({ formPresupuesto }) => {
     await formPresupuesto.abrirNuevo();
     await formPresupuesto.completar({
       cliente: `${MARCA_QA}-NEG`,
@@ -44,14 +44,14 @@ test.describe('CU-PR — Presupuestos', () => {
     expect(resultado.guardo, 'no debe aceptarse un costo de materiales negativo').toBe(false);
   });
 
-  test('CU-TR-09 · el campo numérico no acepta texto', async ({ formPresupuesto }) => {
+  test('CU-TR-09 · el campo numérico no acepta texto', { tag: '@destructive' }, async ({ formPresupuesto }) => {
     await formPresupuesto.abrirNuevo();
     const valor = await formPresupuesto.tipearEnMateriales('abc');
 
     expect(valor, 'el campo debe quedar vacío tras tipear texto').toBe('');
   });
 
-  test('CU-PR-01 y CU-PR-02 · alta válida y aparición en el listado con ID PR-XXXX', async ({
+  test('CU-PR-01 y CU-PR-02 · alta válida y aparición en el listado con ID PR-XXXX', { tag: '@destructive' }, async ({
     formPresupuesto, listaPresupuestos,
   }) => {
     const cliente = `${MARCA_QA}-OK`;
@@ -79,7 +79,7 @@ test.describe('CU-PR — Presupuestos', () => {
     expect(contexto).toContain('1.000.000');
   });
 
-  test('OBS-07 · el botón de alta desaparece cuando el listado tiene datos', async ({ listaPresupuestos }) => {
+  test('OBS-07 · el botón de alta desaparece cuando el listado tiene datos', { tag: '@destructive' }, async ({ listaPresupuestos }) => {
     await listaPresupuestos.abrir();
 
     // Documenta el comportamiento observado: con datos cargados no hay acceso

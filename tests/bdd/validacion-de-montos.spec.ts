@@ -36,7 +36,7 @@ test.describe('Característica: Validación de montos en los movimientos de dine
     await ingresarComo('ADMIN');
   });
 
-  test('Escenario: No se puede registrar un cobro con monto negativo', async ({ formIngreso }) => {
+  test('Escenario: No se puede registrar un cobro con monto negativo', { tag: '@destructive' }, async ({ formIngreso }) => {
     await test.step('Dado que estoy registrando un cobro sobre una venta existente', async () => {
       await formIngreso.abrirNuevo();
       await formIngreso.seleccionarPrimeraVenta();
@@ -45,6 +45,7 @@ test.describe('Característica: Validación de montos en los movimientos de dine
     });
 
     let rechazado = false;
+
     await test.step('Cuando cargo un monto de -500 y guardo el cobro', async () => {
       await formIngreso.completarMonto(-500);
       const resultado = await formIngreso.guardarIngreso();
@@ -56,7 +57,7 @@ test.describe('Característica: Validación de montos en los movimientos de dine
     });
   });
 
-  test('Escenario: No se puede registrar un pago con monto negativo', async ({ formEgreso }) => {
+  test('Escenario: No se puede registrar un pago con monto negativo', { tag: '@destructive' }, async ({ formEgreso }) => {
     await test.step('Dado que estoy registrando un pago a un proveedor existente', async () => {
       await formEgreso.abrirNuevo();
       await formEgreso.seleccionarPrimerProveedor();
@@ -64,6 +65,7 @@ test.describe('Característica: Validación de montos en los movimientos de dine
     });
 
     let rechazado = false;
+
     await test.step('Cuando cargo un monto de -300 y guardo el pago', async () => {
       await formEgreso.completarMonto(-300);
       const resultado = await formEgreso.guardarEgreso();
@@ -75,12 +77,13 @@ test.describe('Característica: Validación de montos en los movimientos de dine
     });
   });
 
-  test('Escenario: No se puede registrar un pago sin proveedor ni obra', async ({ formEgreso }) => {
+  test('Escenario: No se puede registrar un pago sin proveedor ni obra', { tag: '@destructive' }, async ({ formEgreso }) => {
     await test.step('Dado que estoy registrando un pago', async () => {
       await formEgreso.abrirNuevo();
     });
 
     let rechazado = false;
+
     await test.step('Cuando dejo el monto en 0 y no indico proveedor ni obra, y guardo', async () => {
       await formEgreso.completarMonto(0);
       const resultado = await formEgreso.guardarEgreso();

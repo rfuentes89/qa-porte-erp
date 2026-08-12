@@ -26,7 +26,7 @@ test.describe('CU-EG — Egresos', () => {
     await ingresarComo('ADMIN');
   });
 
-  test('CU-EG-04 · rechaza un egreso sin obra ni proveedor y con monto 0 [DEF-08]', async ({ formEgreso }) => {
+  test('CU-EG-04 · rechaza un egreso sin obra ni proveedor y con monto 0 [DEF-08]', { tag: '@destructive' }, async ({ formEgreso }) => {
     await formEgreso.abrirNuevo();
     await formEgreso.completarMonto(0);
     const res = await formEgreso.guardarEgreso();
@@ -36,7 +36,7 @@ test.describe('CU-EG — Egresos', () => {
     expect(res.guardo, 'no debe guardarse un egreso sin obra ni proveedor (RN-04)').toBe(false);
   });
 
-  test('CU-EG-11 · rechaza un egreso con monto negativo [DEF-08]', async ({ formEgreso }) => {
+  test('CU-EG-11 · rechaza un egreso con monto negativo [DEF-08]', { tag: '@destructive' }, async ({ formEgreso }) => {
     await formEgreso.abrirNuevo();
     await formEgreso.seleccionarPrimerProveedor();
     await formEgreso.elegirTipo('MATERIALES');
@@ -48,7 +48,7 @@ test.describe('CU-EG — Egresos', () => {
     expect(res.guardo, 'no debe aceptarse un egreso de monto negativo').toBe(false);
   });
 
-  test('CU-EG-07 · al marcar "Es un cheque" aparece la fecha de acreditación', async ({ formEgreso }) => {
+  test('CU-EG-07 · al marcar "Es un cheque" aparece la fecha de acreditación', { tag: '@destructive' }, async ({ formEgreso }) => {
     await formEgreso.abrirNuevo();
     const fechasCheque = await formEgreso.marcarCheque();
 

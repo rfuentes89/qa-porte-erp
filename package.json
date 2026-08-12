@@ -5,17 +5,30 @@
   "description": "Suite de QA del MVP de PORTE ERP",
   "scripts": {
     "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:destructive": "playwright test --grep @destructive --workers=1",
+    "test:readonly": "playwright test --grep-invert @destructive",
     "test:permisos": "playwright test tests/permisos.spec.ts",
     "test:presupuestos": "playwright test tests/presupuestos.spec.ts",
     "test:headed": "playwright test --headed",
     "report": "playwright show-report",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"tests/**/*.ts\" \"*.ts\""
   },
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
     "@playwright/test": "^1.61.1",
     "@types/node": "^24.0.0",
     "dotenv": "^17.0.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-playwright": "^2.1.0",
+    "prettier": "^3.4.0",
     "tsx": "^4.23.9",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.16.0"
   }
 }

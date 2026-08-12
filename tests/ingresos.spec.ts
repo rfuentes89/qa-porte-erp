@@ -27,7 +27,7 @@ test.describe('CU-IN — Ingresos', () => {
     await ingresarComo('ADMIN');
   });
 
-  test('CU-IN-05/06 · rechaza un ingreso sin venta y con monto 0', async ({ formIngreso }) => {
+  test('CU-IN-05/06 · rechaza un ingreso sin venta y con monto 0', { tag: '@destructive' }, async ({ formIngreso }) => {
     await formIngreso.abrirNuevo();
     await formIngreso.completarMonto(0);
     const res = await formIngreso.guardarIngreso();
@@ -35,7 +35,7 @@ test.describe('CU-IN — Ingresos', () => {
     expect(res.guardo, 'no debe guardarse un ingreso sin obra y con monto 0').toBe(false);
   });
 
-  test('CU-IN-06 · rechaza un ingreso con monto negativo [DEF-07]', async ({ formIngreso }) => {
+  test('CU-IN-06 · rechaza un ingreso con monto negativo [DEF-07]', { tag: '@destructive' }, async ({ formIngreso }) => {
     await formIngreso.abrirNuevo();
     await formIngreso.seleccionarPrimeraVenta();
     await formIngreso.elegirTipo('ANTICIPO');

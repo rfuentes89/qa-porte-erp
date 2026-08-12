@@ -55,7 +55,7 @@ test.describe('CU-RL-20/21 — Row Level Security de Supabase', () => {
     await api.dispose();
   });
 
-  test('el perfil de carga puede leer las tablas principales por API directa [OBS-14]', async () => {
+  test('el perfil de carga puede leer las tablas principales por API directa [OBS-14]', { tag: '@destructive' }, async () => {
     const rest = clienteRest(api, carga);
     for (const tabla of TABLAS_PRINCIPALES) {
       const res = await rest.get(`${tabla}?select=*&limit=1`);
@@ -63,7 +63,7 @@ test.describe('CU-RL-20/21 — Row Level Security de Supabase', () => {
     }
   });
 
-  test('CU-RL-21 · la escalada de privilegios está bloqueada', async () => {
+  test('CU-RL-21 · la escalada de privilegios está bloqueada', { tag: '@destructive' }, async () => {
     const rest = clienteRest(api, carga);
 
     const perfil = (await (await rest.get('profiles?select=id,role')).json()) as Array<{ id: string; role: string }>;
@@ -83,7 +83,7 @@ test.describe('CU-RL-20/21 — Row Level Security de Supabase', () => {
     expect(rolFinal, 'RLS no debe permitir que el perfil de carga cambie su rol').toBe('data_entry');
   });
 
-  test('CU-RL-20 · las validaciones de negocio son solo del frontend [DEF-06]', async () => {
+  test('CU-RL-20 · las validaciones de negocio son solo del frontend [DEF-06]', { tag: '@destructive' }, async () => {
     const restCarga = clienteRest(api, carga);
     const restAdmin = clienteRest(api, admin);
     const id = 'PR-RLS-SPEC';

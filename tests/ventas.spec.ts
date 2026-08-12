@@ -8,7 +8,7 @@ import { test, expect } from './support/fixtures';
  * derivan de los ingresos, no se editan aquí.
  */
 test.describe('CU-VE — Ventas', () => {
-  test('CU-VE-01 · el listado muestra las ventas con id PR-XXXX', async ({ ingresarComo, ventas }) => {
+  test('CU-VE-01 · el listado muestra las ventas con id PR-XXXX', { tag: '@smoke' }, async ({ ingresarComo, ventas }) => {
     await ingresarComo('ADMIN');
     await ventas.abrir();
 
@@ -19,7 +19,7 @@ test.describe('CU-VE — Ventas', () => {
     }
   });
 
-  test('CU-VE-13 · no se puede crear una venta manualmente', async ({ ingresarComo, ventas }) => {
+  test('CU-VE-13 · no se puede crear una venta manualmente', { tag: '@regression' }, async ({ ingresarComo, ventas }) => {
     await ingresarComo('ADMIN');
     await ventas.abrir();
 
@@ -29,7 +29,7 @@ test.describe('CU-VE — Ventas', () => {
     ).toBe(false);
   });
 
-  test('el detalle de una venta abre sin exponer edición de cobranzas', async ({ ingresarComo, ventas }) => {
+  test('el detalle de una venta abre sin exponer edición de cobranzas', { tag: '@regression' }, async ({ ingresarComo, ventas }) => {
     await ingresarComo('ADMIN');
     await ventas.abrir();
 
@@ -39,7 +39,7 @@ test.describe('CU-VE — Ventas', () => {
     expect(await ventas.rutaActual()).toMatch(/\/ventas\//);
   });
 
-  test('el perfil de carga también ve el listado de ventas', async ({ ingresarComo, ventas }) => {
+  test('el perfil de carga también ve el listado de ventas', { tag: '@regression' }, async ({ ingresarComo, ventas }) => {
     await ingresarComo('CARGA');
     await ventas.abrir();
     expect(await ventas.cantidad()).toBeGreaterThan(0);
