@@ -66,19 +66,23 @@ test.describe('CU-RL-20/21 — Row Level Security de Supabase', () => {
   test('CU-RL-21 · la escalada de privilegios está bloqueada', { tag: '@destructive' }, async () => {
     const rest = clienteRest(api, carga);
 
-    const perfil = (await (await rest.get('profiles?select=id,role')).json()) as Array<{ id: string; role: string }>;
-    expect(perfil, 'el perfil de carga debe ver su propia fila').toHaveLength(1);
-    expect(perfil[0]?.role).toBe('data_entry');
+    // Nota (2026-08-15): la política de LECTURA de profiles se amplió — el perfil
+    // de carga ahora ve todas las filas (OBS-18), no solo la propia. Se ubica su
+    // fila por el rol data_entry. Lo que importa aquí es la ESCRITURA: que no
+    // pueda cambiar su rol (escalada).
+    const perfiles = (await (await rest.get('profiles?select=id,role')).json()) as Array<{ id: string; role: string }>;
+    const propio = perfiles.find((p) => p.role === 'data_entry');
+    expect(propio, 'debe existir la fila del perfil de carga').toBeTruthy();
 
     // Intento de auto-elevarse a admin.
-    await rest.patch(`profiles?id=eq.${perfil[0]?.id}`, { role: 'admin' });
+    await rest.patch(`profiles?id=eq.${propio?.id}`, { role: 'admin' });
 
-    const despues = (await (await rest.get(`profiles?id=eq.${perfil[0]?.id}&select=role`)).json()) as Array<{ role: string }>;
+    const despues = (await (await rest.get(`profiles?id=eq.${propio?.id}&select=role`)).json()) as Array<{ role: string }>;
     const rolFinal = despues[0]?.role;
 
     if (rolFinal !== 'data_entry') {
       // Revertir antes de fallar, para no dejar el entorno con el rol elevado.
-      await rest.patch(`profiles?id=eq.${perfil[0]?.id}`, { role: 'data_entry' });
+      await rest.patch(`profiles?id=eq.${propio?.id}`, { role: 'data_entry' });
     }
     expect(rolFinal, 'RLS no debe permitir que el perfil de carga cambie su rol').toBe('data_entry');
   });

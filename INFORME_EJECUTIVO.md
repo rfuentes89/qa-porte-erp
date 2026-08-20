@@ -25,6 +25,10 @@ El sistema atravesó una etapa de correcciones importante y hoy se encuentra en 
 
 - **El acceso está bien protegido.** Hay dos tipos de usuario (administrador y carga de datos). Un usuario de carga no puede "ascender" a administrador ni ver datos de otros usuarios: la separación de identidades es correcta.
 
+- **Nuevo: proyecta la liquidez (módulo Finanzas).** La aplicación ya muestra cuánta plata hay en cada cuenta (banco, billeteras, efectivo) y, sobre todo, **una proyección de caja hacia adelante**: anticipa en qué fecha la caja se quedaría en negativo (el "descalce"), cuál sería el saldo mínimo y qué cobertura haría falta, cruzando cobros, pagos, cheques y compromisos. Es la función que el diseño consideraba la **más importante** de todo el sistema, y hasta hace poco no existía.
+
+- **Nuevo: el cliente de un presupuesto es un dato real.** Al cotizar, el cliente se elige de una lista (ya no se escribe suelto) y el sistema exige que exista. Evita presupuestos con clientes mal escritos o inexistentes.
+
 - **Nuevo: un asistente con inteligencia artificial.** Permite cargar presupuestos hablándole en lenguaje natural (por texto, voz o adjuntando la foto/PDF de un comprobante). Entiende el pedido, valida la categoría contra las opciones válidas y pregunta para confirmar. Importante: **respeta las mismas validaciones** que el resto del sistema — probamos pedirle un presupuesto con montos negativos y se negó a cargarlo.
 
 ---
@@ -37,19 +41,15 @@ El usuario de "Carga de datos" puede **dar de baja** proveedores (y clientes), i
 
 *(Atenuante: la baja no borra el registro para siempre — queda inactivo y es recuperable a nivel de base de datos.)*
 
-### 2. La nota de rentabilidad aparece antes de tiempo · Prioridad **Media**
+### 2. El bloqueo de pantallas no protege la información · Prioridad **Media / a definir**
 
-En una obra **todavía en fabricación**, la aplicación ya le pone una nota de rentabilidad ("Buena"). El problema es que esa nota es engañosa: la obra parece muy rentable **solo porque todavía no se gastó lo que falta**. La nota debería mostrarse recién cuando la obra está terminada, para no sacar conclusiones prematuras.
+Al usuario de carga se le ocultan dos pantallas (el Tablero y la Configuración), pero la misma información sensible —montos de ventas, deudas, saldos— sigue estando a la vista en las otras pantallas que ese usuario sí puede abrir. **Con el nuevo módulo Finanzas esto se acentúa:** el usuario de carga también puede abrirlo y ver la posición de caja completa de la empresa y la proyección de liquidez. Si la intención es que cierta gente no vea ciertos números, hoy no se está logrando. Hay que decidir si eso es un problema según quién use cada cuenta.
 
-### 3. El bloqueo de pantallas no protege la información · Prioridad **Media / a definir**
-
-Al usuario de carga se le ocultan dos pantallas (el Tablero y la Configuración), pero la misma información sensible —montos de ventas, deudas, saldos— sigue estando a la vista en las otras pantallas que ese usuario sí puede abrir. Si la intención es que cierta gente no vea ciertos números, hoy no se está logrando. Hay que decidir si eso es un problema según quién use cada cuenta.
-
-### 4. Las fechas se muestran con el día cambiado · Prioridad **Baja**
+### 3. Las fechas se muestran con el día cambiado · Prioridad **Baja**
 
 Lo que se carga por la tarde/noche aparece **fechado al día siguiente**, porque el sistema usa la hora de referencia de Londres en lugar de la de Argentina. Afecta los totales de "hoy" y los filtros por fecha: un movimiento de la tarde puede contarse en el día equivocado.
 
-### 5. El campo Teléfono acepta letras · Prioridad **Baja**
+### 4. El campo Teléfono acepta letras · Prioridad **Baja**
 
 El campo Teléfono (en proveedores y clientes) admite letras y símbolos, sin validar el formato. No rompe cuentas, pero ensucia los datos de contacto.
 
@@ -63,10 +63,10 @@ La conversión de presupuesto a venta funciona en general, pero se detectó **un
 
 Los documentos de diseño de PORTE describen un sistema más completo que el publicado. Estas funciones **figuran en el diseño pero todavía no existen** en la aplicación. No las contamos como errores —puede ser un recorte intencional de esta etapa— pero conviene tenerlas a la vista.
 
+> **Buena noticia:** las dos pantallas más importantes que faltaban —**Caja y bancos** y la **Proyección de flujo de fondos**— ya se construyeron (módulo Finanzas). La lista de abajo es lo que todavía queda.
+
 ### Pantallas que faltan
 
-- **Proyección de flujo de fondos.** Anticipar cuánta plata habrá en 30, 60 y 90 días, cruzando cobros esperados, pagos, cheques a vencer y gastos fijos. El diseño la marca como la función **más importante y de máxima prioridad** de todo el sistema, y hoy **no existe**.
-- **Caja y bancos.** Ver, en vivo, cuánta plata hay en cada cuenta. Los movimientos se cargan, pero no hay una vista consolidada de saldos.
 - **Cuentas de clientes.** El resumen de cuánto debe cada cliente, hace cuántos días que no paga y si está en mora.
 - **Tablero gerencial.** El panel con los grandes indicadores para la dirección (tasa de conversión, liquidez, rentabilidad). Existe una pantalla de "Inicio", pero no reúne todos esos indicadores.
 - **Compras** como registro propio. El diseño separa la compra (el compromiso con el proveedor) del pago (la salida de plata); hoy está unificado dentro de Egresos, sin ver el estado de cada compra.
@@ -77,7 +77,7 @@ Los documentos de diseño de PORTE describen un sistema más completo que el pub
 
 ### Por qué importa
 
-Conviene **aclarar con el equipo** si estas funciones son un recorte intencional de la versión de prueba (trabajo futuro planificado) o un desvío respecto de lo esperado. Llama la atención que la función marcada como más importante en el diseño —la proyección de flujo de fondos— sea justamente una de las que faltan.
+Conviene **aclarar con el equipo** si estas funciones son un recorte intencional de la versión de prueba (trabajo futuro planificado) o un desvío respecto de lo esperado.
 
 ---
 
@@ -86,11 +86,10 @@ Conviene **aclarar con el equipo** si estas funciones son un recorte intencional
 | # | Pendiente | Qué tan grave | Recomendación |
 |---|---|---|---|
 | 1 | El usuario de carga puede dar de baja proveedores/clientes | **Alto** | Decidir permisos por tipo de usuario |
-| 2 | La nota de rentabilidad aparece en obras en curso | Medio | Mostrarla solo en obras terminadas |
-| 3 | El bloqueo de pantallas no protege datos | Medio | Definir qué debe ver cada usuario |
-| 4 | Fechas con el día cambiado (zona horaria) | Bajo | Ajustar a la hora de Argentina |
-| 5 | El teléfono acepta letras | Bajo | Validar el formato |
-| 6 | Un presupuesto aceptado sin su venta | Bajo | Revisar el caso puntual |
-| — | Funciones del diseño que faltan (flujo de fondos, caja, cuentas de clientes, tablero, compras) | A definir | **Aclarar alcance con el equipo** |
+| 2 | El bloqueo de pantallas no protege datos (agravado con Finanzas) | Medio | Definir qué debe ver cada usuario |
+| 3 | Fechas con el día cambiado (zona horaria) | Bajo | Ajustar a la hora de Argentina |
+| 4 | El teléfono acepta letras | Bajo | Validar el formato |
+| 5 | Un presupuesto aceptado sin su venta | Bajo | Revisar el caso puntual |
+| — | Funciones del diseño que faltan (cuentas de clientes, tablero gerencial, compras) | A definir | **Aclarar alcance con el equipo** |
 
-**En una frase:** hoy PORTE registra y controla bien la operación diaria, con validaciones sólidas y un asistente que suma. Lo que queda es afinar permisos y algunos detalles, y definir cuándo se construye el bloque de proyección y análisis (flujo de fondos, caja, tablero) que el diseño considera el corazón del sistema.
+**En una frase:** hoy PORTE registra, controla **y proyecta** bien la operación diaria: al ciclo de cotizar–vender–cobrar–pagar se sumó la proyección de liquidez (la función que el diseño consideraba central). Lo que queda es afinar **permisos** —quién puede dar de baja maestros y quién debe ver la información financiera— y algunos detalles menores.

@@ -671,12 +671,22 @@ Suite automatizada en Playwright + TypeScript con Page Object Model (`tests/`). 
 
 > **Re-verificado el 2026-08-12** tras una actualización de la app. 8 defectos corregidos, 4 abiertos. Detalle en [reportes/2026-08-12-reverificacion-tras-actualizacion.md](reportes/2026-08-12-reverificacion-tras-actualizacion.md).
 
+> **Re-verificado el 2026-08-15** (módulo Finanzas): se construyó Caja y bancos + Flujo de fondos; DEF-10 corregido; el cliente del presupuesto ahora es un desplegable con integridad referencial. Ver [reportes/2026-08-15-reverificacion-finanzas.md](reportes/2026-08-15-reverificacion-finanzas.md).
+
 **Abiertos**
 
 | ID | Severidad | Descripción | Caso |
 |---|---|---|---|
-| **DEF-04** | Alta | El perfil de carga edita y da de baja proveedores; el backend lo permite | DEF-04 |
-| **DEF-10** | Media | La nota de rentabilidad se calcula para obras aún en ejecución y da "Buena" solo porque todavía no se gastó todo. El diseño restringe el KPI a obras Entregadas/Cobradas | CU-KP-01 |
+| **DEF-04** | Alta | El perfil de carga edita y da de baja proveedores; el backend lo permite. Confirmado abierto el 2026-08-15 | DEF-04 |
+| **OBS-17** | Baja | Un presupuesto Aceptado (PR-0584) no generó su venta. Sigue el 2026-08-15 | CU-VE |
+| **OBS-10** | Baja | Las fechas se muestran en UTC, no en hora local. Sigue el 2026-08-15 | — |
+| **OBS-18** | Baja/Media | La política de lectura de `profiles` se amplió: el perfil de carga ve todos los perfiles (nombre y rol del admin), antes solo el propio. Exposición de metadatos. La escalada de privilegios y la escritura sobre otras filas siguen bloqueadas (re-verificado) | CU-RL-21 |
+
+**Corregido el 2026-08-15**
+
+| ID | Descripción | Verificación del cierre |
+|---|---|---|
+| **DEF-10** | ~~Nota de rentabilidad prematura en obras en curso~~ | El detalle de obra muestra Coste Estimado vs Coste Real sin la nota "Buena" anticipada |
 
 **Corregidos (2026-08-11/12)**
 
