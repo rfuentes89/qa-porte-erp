@@ -87,40 +87,62 @@ test.describe('CU-RL-20/21 — Row Level Security de Supabase', () => {
     expect(rolFinal, 'RLS no debe permitir que el perfil de carga cambie su rol').toBe('data_entry');
   });
 
-  test('CU-RL-20 · el backend valida los datos, no solo el frontend [DEF-06 corregido]', { tag: '@destructive' }, async () => {
+  test('CU-RL-20a · el backend exige un cliente existente (FK)', { tag: '@destructive' }, async () => {
+    const restCarga = clienteRest(api, carga);
+
+    // El cliente pasó a ser una referencia real: un cliente inexistente se rechaza.
+    const res = await restCarga.post('presupuestos', {
+      id: 'PR-RLS-FK', cliente: '', descripcion: 'sonda FK - anular',
+      estado_comercial: 'Cancelado', fecha: '2026-08-19',
+      costo_mat: 1000, costo_mo: 0, ind_vendidos: 0, impuestos: 0, comercial: 0, beneficio: 0,
+    });
+
+    // El backend responde CLIENTE_NO_EXISTE (400). Guarda de regresión de la FK.
+    expect(res.status(), 'el backend debe rechazar un cliente inexistente').toBe(400);
+  });
+
+  test('CU-RL-20b · el backend NO valida el monto (solo lo hace el frontend) [DEF-06]', { tag: '@destructive' }, async () => {
     const restCarga = clienteRest(api, carga);
     const restAdmin = clienteRest(api, admin);
-    const id = 'PR-RLS-SPEC';
+    // Id único por corrida: el borrado físico de presupuestos no está habilitado
+    // (la baja es lógica), así que un id fijo dejaría un huérfano y la próxima
+    // corrida chocaría con un 409.
+    const id = `PR-RLS-MONTO-${Date.now()}`;
 
-    // Un presupuesto que la UI rechaza: sin cliente y con costo negativo.
-    const invalido = {
-      id,
-      cliente: '',
-      descripcion: 'sonda RLS spec - anular',
-      estado_comercial: 'Cancelado',
-      fecha: '2026-08-07',
-      costo_mat: -99999,
-      costo_mo: 0, ind_vendidos: 0, impuestos: 0, comercial: 0, beneficio: 0,
-    };
+    // Se toma un cliente del MAESTRO para aislar la validación de monto de la FK.
+    // (No sirve el cliente de un presupuesto viejo: pueden ser textos libres
+    // pre-FK que ya no existen en el maestro y dispararían CLIENTE_NO_EXISTE.)
+    const maestro = (await (
+      await restAdmin.get('clientes?select=nombre&limit=1')
+    ).json()) as Array<{ nombre: string }>;
+    const clienteReal = maestro[0]?.nombre;
+    expect(clienteReal, 'debe existir al menos un cliente en el maestro').toBeTruthy();
 
-    const res = await restCarga.post('presupuestos', invalido);
+    // Con cliente válido, la UI bloquea un costo negativo; el backend no.
+    const res = await restCarga.post('presupuestos', {
+      id, cliente: clienteReal, descripcion: 'sonda monto negativo - anular',
+      estado_comercial: 'Cancelado', fecha: '2026-08-19',
+      costo_mat: -99999, costo_mo: 0, ind_vendidos: 0, impuestos: 0, comercial: 0, beneficio: 0,
+    });
     const aceptado = res.status() === 201;
 
-    // Red de seguridad: si el backend aún lo aceptara, se neutraliza con admin.
+    // Limpieza: baja lógica (el DELETE físico no está habilitado por RLS).
     if (aceptado) {
       await restAdmin.patch(
         `presupuestos?id=eq.${id}`,
-        { activo: false, cliente: 'QA-RLS-ANULADO', descripcion: 'ANULAR - sonda RLS spec' },
+        { activo: false, estado_comercial: 'Cancelado', costo_mat: 0, descripcion: 'QA-ANULADO sonda RLS' },
         'return=minimal',
       );
     }
 
-    // DEF-06 corregido (actualización 2026-08-11): la validación ya no vive
-    // solo en el frontend; el backend rechaza el presupuesto inválido por API.
-    // Guarda de regresión: vuelve a rojo si alguien quita esa validación.
+    // HALLAZGO (corrige la conclusión previa): el backend acepta un costo
+    // negativo con cliente válido. La validación de monto vive SOLO en el
+    // frontend (DEF-06 sigue abierto a nivel de datos). Este test documenta el
+    // estado actual; debe pasar a rojo (aceptado === false) cuando el backend
+    // agregue el CHECK de monto, momento de cerrar DEF-06.
     expect(
       aceptado,
-      'el backend debe rechazar un presupuesto sin cliente y con costo negativo (DEF-06)',
-    ).toBe(false);
+      'hoy el backend ACEPTA un costo negativo con cliente válido; si empieza a rechazarlo, cerrar DEF-06 y actualizar este test',
+    ).toBe(true);
   });
 });

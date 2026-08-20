@@ -37,6 +37,7 @@ export const RUTAS = {
   gastosFijos: '/gastos-fijos',
   variaciones: '/variaciones',
   aprendizajes: '/aprendizajes',
+  finanzas: '/finanzas',
   registros: '/mis-registros',
   perfil: '/profile',
   config: '/config',

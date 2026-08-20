@@ -34,8 +34,9 @@ test.describe('CU-VE — Ventas', () => {
     await ventas.abrir();
 
     const solapas = await ventas.abrirPrimerDetalle();
-    // El detalle se organiza en solapas Datos / Variaciones / Aprendizajes.
-    expect(solapas.some((t) => /datos/i.test(t))).toBe(true);
+    // El detalle se organiza en solapas Condiciones / Ingresos / Egresos /
+    // Variac. / Aprend. (antes la primera se llamaba "Datos").
+    expect(solapas.some((t) => /condiciones/i.test(t))).toBe(true);
     expect(await ventas.rutaActual()).toMatch(/\/ventas\//);
   });
 

@@ -7,6 +7,7 @@ export type EstadoComercial =
   | 'Aceptado' | 'Rechazado' | 'Represupuestado' | 'Cancelado';
 
 export interface DatosPresupuesto {
+  /** Etiqueta de un cliente existente del desplegable (opcional). */
   cliente?: string;
   descripcion?: string;
   materiales?: number;
@@ -32,19 +33,27 @@ export interface ResultadoGuardado {
  * `type`, y no usan `<label for>`. Hay que ubicarlos por posición absoluta
  * sobre `<input>`, lo que es frágil ante cualquier reordenamiento del layout.
  * Ver la nota de automatización del reporte del 2026-08-06.
+ *
+ * Actualización 2026-08-19: el Cliente pasó de texto libre a un `<select>`
+ * (referencia a un cliente existente). Al dejar de ser un `<input>`, todos los
+ * campos de texto/número corrieron un lugar en la colección `input`, así que
+ * los índices se recalcularon. El cliente se opera con `seleccionarCliente*`.
  */
 export class PresupuestoFormPage {
-  /** Índice 0 es el buscador del encabezado, que no pertenece al formulario. */
+  /**
+   * Índices dentro de la colección `<input>` (el `<select>` de cliente y el
+   * `<textarea>` de observaciones NO cuentan). Índice 0 es el buscador del
+   * encabezado, que no pertenece al formulario.
+   */
   private static readonly IDX = {
-    cliente: 1,
-    descripcion: 2,
-    materiales: 3,
-    manoDeObra: 4,
-    indirectos: 5,
-    impuestos: 6,
-    comercial: 7,
-    beneficio: 8,
-    vencimiento: 9,
+    descripcion: 1,
+    materiales: 2,
+    manoDeObra: 3,
+    indirectos: 4,
+    impuestos: 5,
+    comercial: 6,
+    beneficio: 7,
+    vencimiento: 8,
   } as const;
 
   private readonly guardarBtn: Locator;
@@ -53,8 +62,33 @@ export class PresupuestoFormPage {
     this.guardarBtn = page.getByRole('button', { name: 'Guardar presupuesto' });
   }
 
+  /** Botón Guardar del formulario (útil como aserción de que el alta cargó). */
+  get botonGuardar(): Locator {
+    return this.guardarBtn;
+  }
+
   private campo(indice: number): Locator {
     return this.page.locator('input').nth(indice);
+  }
+
+  private get selectCliente(): Locator {
+    return this.page.locator('select').first();
+  }
+
+  /**
+   * Selecciona el primer cliente real del desplegable (la opción 0 es el
+   * placeholder "Elegí un cliente…") y devuelve su etiqueta, para poder
+   * verificarlo luego en el listado.
+   */
+  async seleccionarClienteExistente(): Promise<string> {
+    const select = this.selectCliente;
+    await select.selectOption({ index: 1 });
+    return (await select.locator('option').nth(1).innerText()).trim();
+  }
+
+  /** Selecciona un cliente por su etiqueta exacta del desplegable. */
+  async seleccionarCliente(etiqueta: string): Promise<void> {
+    await this.selectCliente.selectOption({ label: etiqueta });
   }
 
   async abrirNuevo(): Promise<void> {
@@ -74,13 +108,9 @@ export class PresupuestoFormPage {
 
   async completar(datos: DatosPresupuesto): Promise<void> {
     const { IDX } = PresupuestoFormPage;
-    const texto: [number, string | undefined][] = [
-      [IDX.cliente, datos.cliente],
-      [IDX.descripcion, datos.descripcion],
-    ];
-    for (const [i, valor] of texto) {
-      if (valor !== undefined) await this.campo(i).fill(valor);
-    }
+
+    if (datos.cliente !== undefined) await this.seleccionarCliente(datos.cliente);
+    if (datos.descripcion !== undefined) await this.campo(IDX.descripcion).fill(datos.descripcion);
 
     const numeros: [number, number | undefined][] = [
       [IDX.materiales, datos.materiales],

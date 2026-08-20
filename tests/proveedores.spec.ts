@@ -92,14 +92,15 @@ test.describe('CU-MA — Proveedores', () => {
 
 /**
  * DEF-04 — El perfil de carga tiene los mismos permisos de escritura sobre
- * proveedores que el administrador.
+ * proveedores que el administrador (defecto ABIERTO).
  *
- * El proveedor descartable lo crea el ADMIN; luego el perfil de carga intenta
- * editarlo y darlo de baja. Confirmado el 2026-08-07: ambas operaciones le
- * son permitidas (PATCH 204 contra el backend).
+ * El proveedor descartable lo crea el ADMIN; luego el perfil de carga lo da de
+ * baja. Confirmado el 2026-08-07 y re-verificado el 2026-08-19: la baja le es
+ * permitida. El test documenta ese estado (verde mientras el defecto siga
+ * abierto) y PASA A ROJO cuando se restrinja el permiso, momento de cerrar DEF-04.
  */
 test.describe('DEF-04 — Permisos de escritura del perfil de carga', () => {
-  test('el perfil de carga no debería poder dar de baja proveedores', { tag: '@destructive' }, async ({
+  test('el perfil de carga puede dar de baja proveedores [DEF-04 abierto]', { tag: '@destructive' }, async ({
     browser, proveedores, ingresarComo,
   }) => {
     test.slow();
@@ -133,6 +134,9 @@ test.describe('DEF-04 — Permisos de escritura del perfil de carga', () => {
       await proveedores.eliminar(nombre);
     }
 
-    expect(sobrevivio, 'el perfil de carga pudo dar de baja un proveedor').toBe(true);
+    expect(
+      sobrevivio,
+      'DEF-04 resuelto: el perfil de carga ya no puede dar de baja proveedores. Cerrar el defecto.',
+    ).toBe(false);
   });
 });

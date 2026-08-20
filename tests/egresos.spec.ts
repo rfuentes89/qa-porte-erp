@@ -48,12 +48,12 @@ test.describe('CU-EG — Egresos', () => {
     expect(res.guardo, 'no debe aceptarse un egreso de monto negativo').toBe(false);
   });
 
-  test('CU-EG-07 · al marcar "Es un cheque" aparece la fecha de acreditación', { tag: '@destructive' }, async ({ formEgreso }) => {
+  test('CU-EG-07 · elegir "Cheque" en Condición de pago suma la fecha de vencimiento', { tag: '@destructive' }, async ({ formEgreso }) => {
     await formEgreso.abrirNuevo();
     const fechasCheque = await formEgreso.marcarCheque();
 
-    // Base: solo la fecha del egreso. Con cheque: emisión + acreditación.
-    expect(fechasCheque, 'el cheque diferido debe exponer fechas de emisión y acreditación')
+    // Base: solo la fecha del egreso. Con cheque: se agrega "Fecha vencimiento".
+    expect(fechasCheque, 'el cheque diferido debe exponer su fecha de vencimiento')
       .toBeGreaterThanOrEqual(2);
   });
 });

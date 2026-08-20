@@ -13,23 +13,23 @@ export interface ResultadoGuardado {
 /**
  * Formulario de alta de egresos (`/egresos/nuevo`).
  *
- * Campos base (por posición): Fecha (date), Monto (number), "Es un cheque"
- * (checkbox). Más buscadores "Buscar venta o cliente..." y "Buscar
- * proveedor...", y grupos de botones de tipo de egreso, cuenta y caja.
+ * Campos base (por posición): Fecha (date), Monto (number). Más buscadores
+ * "Buscar venta o cliente..." y "Buscar proveedor...", y grupos de botones de
+ * tipo de egreso, cuenta y caja.
  *
- * Al marcar "Es un cheque" aparecen dos fechas adicionales (emisión y
- * acreditación): el flujo de fondos se rige por la fecha de acreditación.
+ * Actualización 2026-08-19: el cheque dejó de ser una casilla suelta y ahora
+ * es una opción del selector "Condición de pago" (Cheque · Cuenta corriente ·
+ * Efectivo · Tarjeta · Transferencia). Al elegir "Cheque" aparece una fecha
+ * adicional ("Fecha vencimiento"), que rige el flujo de fondos diferido.
  *
  * Los egresos no se editan ni eliminan desde la interfaz; la limpieza de los
  * que persistan se hace por API (support/supabase.ts).
  */
 export class EgresoFormPage {
   private readonly guardar: Locator;
-  private readonly esCheque: Locator;
 
   constructor(private readonly page: Page) {
     this.guardar = page.getByRole('button', { name: 'Guardar', exact: true });
-    this.esCheque = page.locator('input[type=checkbox]').first();
   }
 
   async abrirNuevo(): Promise<void> {
@@ -57,9 +57,12 @@ export class EgresoFormPage {
     await this.page.locator('input[type=number]').first().fill(String(monto));
   }
 
-  /** Marca "Es un cheque" y devuelve cuántos campos de fecha quedan visibles. */
+  /**
+   * Elige "Cheque" en la Condición de pago y devuelve cuántos campos de fecha
+   * quedan visibles (base 1 → 2 al sumar la fecha de vencimiento del cheque).
+   */
   async marcarCheque(): Promise<number> {
-    await this.esCheque.check();
+    await this.page.getByRole('button', { name: 'Cheque', exact: true }).first().click();
     await this.page.waitForTimeout(1_200);
     return this.page.locator('input[type=date]:visible').count();
   }

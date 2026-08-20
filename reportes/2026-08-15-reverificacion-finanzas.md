@@ -50,9 +50,16 @@ También se **mejoró el formulario de Egresos**: el cheque dejó de ser una cas
 
 En el formulario de presupuestos, el campo **Cliente pasó de ser texto libre a un desplegable** que elige de la lista de clientes. Y el sistema lo **valida en el fondo**: al intentar crear un presupuesto con un cliente inexistente, el backend lo rechaza con el mensaje *"el cliente no existe, debe crearse antes"*. Esto corrige una debilidad que habíamos señalado (los clientes se cargaban sueltos, sin relación real) y evita presupuestos con clientes mal escritos o inexistentes.
 
-### Confirmado: la validación de montos sigue firme
+### Corrección (2026-08-19): la validación de montos es SOLO del frontend
 
-Se verificó **directamente contra el backend** que sigue rechazando datos inválidos: un intento de crear por API un presupuesto sin cliente y con costo negativo fue **rechazado** (error 400). Las correcciones de las revisiones anteriores (no se aceptan montos imposibles) se mantienen.
+En la primera pasada se concluyó que "el backend rechaza montos inválidos". Al poner la suite al día se comprobó que **esa conclusión era incorrecta**: el rechazo (error 400) de aquel intento venía del **cliente vacío** (la nueva FK de cliente), no del monto.
+
+Probando con un **cliente válido del maestro** y un `id` explícito, el backend **acepta** por API un presupuesto con **importe total 0** y con **costo negativo** (respuesta 201). Es decir:
+
+- **La FK de cliente sí la aplica el backend** (rechaza clientes inexistentes) — mejora real y confirmada.
+- **La validación de monto (> 0, sin negativos) vive solo en el frontend.** Si alguien saltea la interfaz (como hace la suite por API), esos datos entran. Esto es **DEF-06, que sigue abierto** a nivel de datos para el monto (la UI sí lo bloquea).
+
+Queda cubierto por dos tests: `CU-RL-20a` (la FK de cliente se aplica) y `CU-RL-20b` (guarda que documenta que el backend hoy acepta el monto negativo; pasará a rojo cuando se agregue el `CHECK` de monto).
 
 ---
 
